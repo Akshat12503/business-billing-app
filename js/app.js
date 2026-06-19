@@ -8,13 +8,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-
 // Category Change
 
 document
     .getElementById("categorySelect")
-    .addEventListener("change", loadProducts);
-
+    .addEventListener(
+        "change",
+        loadProducts
+    );
 
 
 
@@ -22,8 +23,10 @@ document
 
 document
     .getElementById("addItemBtn")
-    .addEventListener("click", addItemToBill);
-
+    .addEventListener(
+        "click",
+        addItemToBill
+    );
 
 
 
@@ -31,8 +34,10 @@ document
 
 document
     .getElementById("saveBillBtn")
-    .addEventListener("click", saveBill);
-
+    .addEventListener(
+        "click",
+        saveBill
+    );
 
 
 
@@ -42,7 +47,7 @@ document
     .getElementById("clearBillBtn")
     .addEventListener("click", () => {
 
-        if (confirm("Clear bill ?")) {
+        if (confirm("Clear bill?")) {
 
             clearBill();
 
@@ -52,17 +57,17 @@ document
 
 
 
-
-// Product Management Modal
+// Product Management
 
 document
     .getElementById("manageProductsBtn")
     .addEventListener("click", () => {
 
-        const modal =
-            new bootstrap.Modal(
-                document.getElementById("productModal")
-            );
+        const modal = new bootstrap.Modal(
+
+            document.getElementById("productModal")
+
+        );
 
         loadCategories();
 
@@ -71,7 +76,6 @@ document
         modal.show();
 
     });
-
 
 
 
@@ -89,7 +93,6 @@ document
         document.getElementById("newCategory").value = "";
 
     });
-
 
 
 
@@ -134,12 +137,14 @@ document
 
 
         addProduct(
+
             name,
             category,
             unit,
             localRate,
             generalRate,
             retailRate
+
         );
 
 
@@ -154,17 +159,14 @@ document
 
 
 
-
 // Export
 
 document
     .getElementById("exportBtn")
-    .addEventListener("click", () => {
-
-        alert("Coming soon");
-
-    });
-
+    .addEventListener(
+        "click",
+        exportData
+    );
 
 
 
@@ -174,10 +176,27 @@ document
     .getElementById("importBtn")
     .addEventListener("click", () => {
 
-        alert("Coming soon");
+        document
+            .getElementById("importFile")
+            .click();
 
     });
 
+
+
+document
+    .getElementById("importFile")
+    .addEventListener("change", event => {
+
+        const file = event.target.files[0];
+
+        if (file) {
+
+            importData(file);
+
+        }
+
+    });
 
 
 
@@ -185,12 +204,10 @@ document
 
 document
     .getElementById("pdfBtn")
-    .addEventListener("click", () => {
-
-        alert("Coming soon");
-
-    });
-
+    .addEventListener(
+        "click",
+        generatePDF
+    );
 
 
 
@@ -200,10 +217,9 @@ document
     .getElementById("whatsappBtn")
     .addEventListener("click", () => {
 
-        alert("Coming soon");
+        alert("WhatsApp sharing coming next.");
 
     });
-
 
 
 

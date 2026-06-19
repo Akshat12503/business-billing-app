@@ -85,14 +85,74 @@ function loadProductTable() {
         <tr>
 
             <td>${product.id}</td>
-            <td>${product.name}</td>
-            <td>${product.category}</td>
-            <td>${product.unit}</td>
-            <td>${product.localRate.toFixed(2)}</td>
-            <td>${product.generalRate.toFixed(2)}</td>
-            <td>${product.retailRate.toFixed(2)}</td>
 
             <td>
+                <input
+                    class="form-control"
+                    id="name-${product.id}"
+                    value="${product.name}">
+            </td>
+
+            <td>
+                <input
+                    class="form-control"
+                    id="category-${product.id}"
+                    value="${product.category}">
+            </td>
+
+            <td>
+
+                <select
+                    class="form-select"
+                    id="unit-${product.id}">
+
+                    <option value="kg"
+                    ${product.unit==="kg"?"selected":""}>
+                    kg
+                    </option>
+
+                    <option value="piece"
+                    ${product.unit==="piece"?"selected":""}>
+                    piece
+                    </option>
+
+                </select>
+
+            </td>
+
+            <td>
+                <input
+                    class="form-control"
+                    type="number"
+                    id="local-${product.id}"
+                    value="${product.localRate}">
+            </td>
+
+            <td>
+                <input
+                    class="form-control"
+                    type="number"
+                    id="general-${product.id}"
+                    value="${product.generalRate}">
+            </td>
+
+            <td>
+                <input
+                    class="form-control"
+                    type="number"
+                    id="retail-${product.id}"
+                    value="${product.retailRate}">
+            </td>
+
+            <td>
+
+                <button
+                    class="btn btn-success btn-sm"
+                    onclick="saveProductChanges(${product.id})">
+
+                    Save
+
+                </button>
 
                 <button
                     class="btn btn-danger btn-sm"
@@ -217,5 +277,39 @@ function deleteProduct(productId) {
     saveProducts(products);
 
     loadProductTable();
+
+}
+
+function saveProductChanges(productId) {
+
+    updateProduct(
+
+        productId,
+
+        document.getElementById(`name-${productId}`).value,
+
+        document.getElementById(`category-${productId}`).value,
+
+        document.getElementById(`unit-${productId}`).value,
+
+        Number(
+            document.getElementById(`local-${productId}`).value
+        ),
+
+        Number(
+            document.getElementById(`general-${productId}`).value
+        ),
+
+        Number(
+            document.getElementById(`retail-${productId}`).value
+        )
+
+    );
+
+    loadProductTable();
+
+    loadCategories();
+
+    loadProducts();
 
 }
