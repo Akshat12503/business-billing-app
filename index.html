@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Billing System</title>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
 <div class="container-fluid p-3">
@@ -22,6 +25,7 @@
 
             <!-- Customer Details -->
             <div class="card mb-3">
+
                 <div class="card-header">
                     Customer Details
                 </div>
@@ -30,6 +34,7 @@
 
                     <div class="mb-3">
                         <label class="form-label">Customer Name</label>
+
                         <input
                             type="text"
                             id="customerName"
@@ -38,17 +43,27 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Seller Type</label>
 
-                        <select id="sellerType" class="form-select">
+                        <label class="form-label">
+                            Seller Type
+                        </label>
+
+                        <select
+                            id="sellerType"
+                            class="form-select">
+
                             <option value="local">Local</option>
                             <option value="general">General</option>
                             <option value="retail">Retail</option>
+
                         </select>
+
                     </div>
 
                 </div>
+
             </div>
+
 
 
             <!-- Product Entry -->
@@ -61,21 +76,44 @@
                 <div class="card-body">
 
                     <div class="mb-3">
-                        <label class="form-label">Category</label>
-                        <select id="categorySelect" class="form-select">
+
+                        <label class="form-label">
+                            Category
+                        </label>
+
+                        <select
+                            id="categorySelect"
+                            class="form-select">
+
                             <option>Select Category</option>
+
                         </select>
+
                     </div>
 
+
                     <div class="mb-3">
-                        <label class="form-label">Product</label>
-                        <select id="productSelect" class="form-select">
+
+                        <label class="form-label">
+                            Product
+                        </label>
+
+                        <select
+                            id="productSelect"
+                            class="form-select">
+
                             <option>Select Product</option>
+
                         </select>
+
                     </div>
 
+
                     <div class="mb-3">
-                        <label class="form-label">Quantity / Weight</label>
+
+                        <label class="form-label">
+                            Quantity / Weight
+                        </label>
 
                         <input
                             type="number"
@@ -83,17 +121,22 @@
                             id="quantity"
                             class="form-control"
                             placeholder="0.000">
+
                     </div>
+
 
                     <button
                         class="btn btn-primary w-100"
                         id="addItemBtn">
+
                         Add Item
+
                     </button>
 
                 </div>
 
             </div>
+
 
 
             <!-- Management -->
@@ -105,16 +148,30 @@
 
                 <div class="card-body d-grid gap-2">
 
-                    <button class="btn btn-success" id="manageProductsBtn">
+                    <button
+                        class="btn btn-success"
+                        id="manageProductsBtn">
+
                         Manage Products
+
                     </button>
 
-                    <button class="btn btn-secondary" id="exportBtn">
+
+                    <button
+                        class="btn btn-secondary"
+                        id="exportBtn">
+
                         Export Data
+
                     </button>
 
-                    <button class="btn btn-warning" id="importBtn">
+
+                    <button
+                        class="btn btn-warning"
+                        id="importBtn">
+
                         Import Data
+
                     </button>
 
                 </div>
@@ -122,6 +179,7 @@
             </div>
 
         </div>
+
 
 
         <!-- Right Side -->
@@ -140,12 +198,14 @@
                         <thead>
 
                         <tr>
+
                             <th>S.No</th>
                             <th>Item</th>
                             <th>Qty/Weight</th>
                             <th>Rate</th>
                             <th>Total</th>
                             <th>Remove</th>
+
                         </tr>
 
                         </thead>
@@ -156,33 +216,64 @@
 
                     </table>
 
+
                     <h3 class="text-end">
-                        Grand Total:
-                        ₹ <span id="grandTotal">0.00</span>
+
+                        Grand Total :
+
+                        ₹ <span id="grandTotal">
+                            0.00
+                        </span>
+
                     </h3>
 
                     <hr>
 
+
                     <div class="d-flex flex-wrap gap-2">
 
-                        <button class="btn btn-success" id="saveBillBtn">
+                        <button
+                            class="btn btn-success"
+                            id="saveBillBtn">
+
                             Save Bill
+
                         </button>
 
-                        <button class="btn btn-primary" id="pdfBtn">
+
+                        <button
+                            class="btn btn-primary"
+                            id="pdfBtn">
+
                             Generate PDF
+
                         </button>
 
-                        <button class="btn btn-dark" id="printBtn">
+
+                        <button
+                            class="btn btn-dark"
+                            id="printBtn">
+
                             Print
+
                         </button>
 
-                        <button class="btn btn-success" id="whatsappBtn">
+
+                        <button
+                            class="btn btn-success"
+                            id="whatsappBtn">
+
                             WhatsApp
+
                         </button>
 
-                        <button class="btn btn-danger" id="clearBillBtn">
+
+                        <button
+                            class="btn btn-danger"
+                            id="clearBillBtn">
+
                             Clear Bill
+
                         </button>
 
                     </div>
@@ -197,6 +288,207 @@
 
 </div>
 
+
+
+<!-- Product Management Modal -->
+
+<div class="modal fade" id="productModal" tabindex="-1">
+
+    <div class="modal-dialog modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+
+                    Product Management
+
+                </h5>
+
+                <button
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <!-- Category -->
+
+                <div class="row mb-3">
+
+                    <div class="col-md-8">
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="newCategory"
+                            placeholder="New Category">
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <button
+                            class="btn btn-success w-100"
+                            id="addCategoryBtn">
+
+                            Add Category
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <hr>
+
+
+                <!-- Product -->
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+
+                        <input
+                            class="form-control"
+                            id="newProductName"
+                            placeholder="Product Name">
+
+                    </div>
+
+
+                    <div class="col-md-6 mb-3">
+
+                        <select
+                            class="form-select"
+                            id="newProductCategory">
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="row">
+
+                    <div class="col-md-3 mb-3">
+
+                        <select
+                            class="form-select"
+                            id="newProductUnit">
+
+                            <option value="kg">
+                                kg
+                            </option>
+
+                            <option value="piece">
+                                piece
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-3 mb-3">
+
+                        <input
+                            type="number"
+                            class="form-control"
+                            id="localRate"
+                            placeholder="Local Rate">
+
+                    </div>
+
+
+                    <div class="col-md-3 mb-3">
+
+                        <input
+                            type="number"
+                            class="form-control"
+                            id="generalRate"
+                            placeholder="General Rate">
+
+                    </div>
+
+
+                    <div class="col-md-3 mb-3">
+
+                        <input
+                            type="number"
+                            class="form-control"
+                            id="retailRate"
+                            placeholder="Retail Rate">
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="btn btn-primary"
+                    id="addProductBtn">
+
+                    Add Product
+
+                </button>
+
+
+                <hr>
+
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered">
+
+                        <thead>
+
+                        <tr>
+
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Unit</th>
+                            <th>Local</th>
+                            <th>General</th>
+                            <th>Retail</th>
+
+                        </tr>
+
+                        </thead>
+
+
+                        <tbody id="productTableBody">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- Bootstrap JS -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Project JS -->
 
 <script src="js/storage.js"></script>
 <script src="js/products.js"></script>

@@ -1,22 +1,34 @@
-// ===== Load Categories into Dropdown =====
+// ===== Main Category Dropdown =====
 
 function loadCategories() {
 
     const categorySelect = document.getElementById("categorySelect");
+    const newProductCategory = document.getElementById("newProductCategory");
 
     categorySelect.innerHTML =
         '<option value="">Select Category</option>';
+
+    newProductCategory.innerHTML = "";
 
     const categories = getCategories();
 
     categories.forEach(category => {
 
-        const option = document.createElement("option");
+        // Main Category Dropdown
+        const option1 = document.createElement("option");
 
-        option.value = category;
-        option.textContent = category;
+        option1.value = category;
+        option1.textContent = category;
 
-        categorySelect.appendChild(option);
+        categorySelect.appendChild(option1);
+
+        // Product Modal Category Dropdown
+        const option2 = document.createElement("option");
+
+        option2.value = category;
+        option2.textContent = category;
+
+        newProductCategory.appendChild(option2);
 
     });
 
@@ -24,7 +36,8 @@ function loadCategories() {
 
 
 
-// ===== Load Products According to Category =====
+
+// ===== Load Products =====
 
 function loadProducts() {
 
@@ -54,17 +67,64 @@ function loadProducts() {
 
 
 
-// ===== Get Product By ID =====
 
-function getProductById(productId) {
+// ===== Product Table =====
+
+function loadProductTable() {
+
+    const tbody = document.getElementById("productTableBody");
+
+    tbody.innerHTML = "";
 
     const products = getProducts();
 
-    return products.find(
-        product => product.id == productId
+    products.forEach(product => {
+
+        tbody.innerHTML += `
+
+        <tr>
+
+            <td>${product.id}</td>
+            <td>${product.name}</td>
+            <td>${product.category}</td>
+            <td>${product.unit}</td>
+            <td>${product.localRate.toFixed(2)}</td>
+            <td>${product.generalRate.toFixed(2)}</td>
+            <td>${product.retailRate.toFixed(2)}</td>
+
+            <td>
+
+                <button
+                    class="btn btn-danger btn-sm"
+                    onclick="deleteProduct(${product.id})">
+
+                    Delete
+
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+
+
+
+
+// ===== Product By ID =====
+
+function getProductById(productId) {
+
+    return getProducts().find(
+        p => p.id == productId
     );
 
 }
+
 
 
 
@@ -72,7 +132,23 @@ function getProductById(productId) {
 
 function addCategory(categoryName) {
 
+    if (categoryName.trim() === "") {
+
+        alert("Enter category name");
+
+        return;
+
+    }
+
     const categories = getCategories();
+
+    if (categories.includes(categoryName)) {
+
+        alert("Category already exists");
+
+        return;
+
+    }
 
     categories.push(categoryName);
 
@@ -82,23 +158,6 @@ function addCategory(categoryName) {
 
 }
 
-
-
-// ===== Delete Category =====
-
-function deleteCategory(categoryName) {
-
-    let categories = getCategories();
-
-    categories = categories.filter(
-        category => category !== categoryName
-    );
-
-    saveCategories(categories);
-
-    loadCategories();
-
-}
 
 
 
@@ -119,11 +178,11 @@ function addProduct(
 
         id: generateProductId(),
 
-        name: name,
+        name,
 
-        category: category,
+        category,
 
-        unit: unit,
+        unit,
 
         localRate: Number(localRate),
 
@@ -135,7 +194,10 @@ function addProduct(
 
     saveProducts(products);
 
+    loadProductTable();
+
 }
+
 
 
 
@@ -143,46 +205,17 @@ function addProduct(
 
 function deleteProduct(productId) {
 
+    if (!confirm("Delete this product?"))
+        return;
+
     let products = getProducts();
 
     products = products.filter(
-        product => product.id != productId
+        p => p.id != productId
     );
 
     saveProducts(products);
 
-}
-
-
-
-// ===== Update Product =====
-
-function updateProduct(
-    productId,
-    name,
-    category,
-    unit,
-    localRate,
-    generalRate,
-    retailRate
-) {
-
-    const products = getProducts();
-
-    const product = products.find(
-        p => p.id == productId
-    );
-
-    if (!product) return;
-
-
-    product.name = name;
-    product.category = category;
-    product.unit = unit;
-    product.localRate = Number(localRate);
-    product.generalRate = Number(generalRate);
-    product.retailRate = Number(retailRate);
-
-    saveProducts(products);
+    loadProductTable();
 
 }

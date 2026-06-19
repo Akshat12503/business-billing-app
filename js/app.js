@@ -1,60 +1,48 @@
-    // ===== Page Load =====
-
 document.addEventListener("DOMContentLoaded", () => {
 
-    // Load categories
     loadCategories();
+
+    loadProductTable();
 
 });
 
 
 
-// ===== Category Change =====
+
+// Category Change
 
 document
     .getElementById("categorySelect")
-    .addEventListener("change", () => {
-
-        loadProducts();
-
-    });
+    .addEventListener("change", loadProducts);
 
 
 
 
-// ===== Add Item Button =====
+// Add Item
 
 document
     .getElementById("addItemBtn")
-    .addEventListener("click", () => {
-
-        addItemToBill();
-
-    });
+    .addEventListener("click", addItemToBill);
 
 
 
 
-// ===== Save Bill Button =====
+// Save Bill
 
 document
     .getElementById("saveBillBtn")
-    .addEventListener("click", () => {
-
-        saveBill();
-
-    });
+    .addEventListener("click", saveBill);
 
 
 
 
-// ===== Clear Bill Button =====
+// Clear Bill
 
 document
     .getElementById("clearBillBtn")
     .addEventListener("click", () => {
 
-        if (confirm("Clear current bill?")) {
+        if (confirm("Clear bill ?")) {
 
             clearBill();
 
@@ -65,77 +53,166 @@ document
 
 
 
-// ===== Export Button =====
-
-document
-    .getElementById("exportBtn")
-    .addEventListener("click", () => {
-
-        alert("Export feature coming soon.");
-
-    });
-
-
-
-
-// ===== Import Button =====
-
-document
-    .getElementById("importBtn")
-    .addEventListener("click", () => {
-
-        alert("Import feature coming soon.");
-
-    });
-
-
-
-
-// ===== Manage Products Button =====
+// Product Management Modal
 
 document
     .getElementById("manageProductsBtn")
     .addEventListener("click", () => {
 
-        alert("Product management panel coming soon.");
+        const modal =
+            new bootstrap.Modal(
+                document.getElementById("productModal")
+            );
+
+        loadCategories();
+
+        loadProductTable();
+
+        modal.show();
 
     });
 
 
 
 
-// ===== PDF Button =====
+// Add Category
+
+document
+    .getElementById("addCategoryBtn")
+    .addEventListener("click", () => {
+
+        const categoryName =
+            document.getElementById("newCategory").value;
+
+        addCategory(categoryName);
+
+        document.getElementById("newCategory").value = "";
+
+    });
+
+
+
+
+// Add Product
+
+document
+    .getElementById("addProductBtn")
+    .addEventListener("click", () => {
+
+        const name =
+            document.getElementById("newProductName").value;
+
+        const category =
+            document.getElementById("newProductCategory").value;
+
+        const unit =
+            document.getElementById("newProductUnit").value;
+
+        const localRate =
+            document.getElementById("localRate").value;
+
+        const generalRate =
+            document.getElementById("generalRate").value;
+
+        const retailRate =
+            document.getElementById("retailRate").value;
+
+
+        if (
+            !name ||
+            !category ||
+            !localRate ||
+            !generalRate ||
+            !retailRate
+        ) {
+
+            alert("Fill all fields");
+
+            return;
+
+        }
+
+
+        addProduct(
+            name,
+            category,
+            unit,
+            localRate,
+            generalRate,
+            retailRate
+        );
+
+
+        document.getElementById("newProductName").value = "";
+        document.getElementById("localRate").value = "";
+        document.getElementById("generalRate").value = "";
+        document.getElementById("retailRate").value = "";
+
+        loadProducts();
+
+    });
+
+
+
+
+// Export
+
+document
+    .getElementById("exportBtn")
+    .addEventListener("click", () => {
+
+        alert("Coming soon");
+
+    });
+
+
+
+
+// Import
+
+document
+    .getElementById("importBtn")
+    .addEventListener("click", () => {
+
+        alert("Coming soon");
+
+    });
+
+
+
+
+// PDF
 
 document
     .getElementById("pdfBtn")
     .addEventListener("click", () => {
 
-        alert("PDF generation coming soon.");
+        alert("Coming soon");
 
     });
 
 
 
 
-// ===== Print Button =====
+// WhatsApp
+
+document
+    .getElementById("whatsappBtn")
+    .addEventListener("click", () => {
+
+        alert("Coming soon");
+
+    });
+
+
+
+
+// Print
 
 document
     .getElementById("printBtn")
     .addEventListener("click", () => {
 
         window.print();
-
-    });
-
-
-
-
-// ===== WhatsApp Button =====
-
-document
-    .getElementById("whatsappBtn")
-    .addEventListener("click", () => {
-
-        alert("WhatsApp sharing coming soon.");
 
     });
