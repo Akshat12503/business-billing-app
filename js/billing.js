@@ -206,3 +206,70 @@ function saveBill() {
     alert("Bill saved successfully.");
 
 }
+// ===== Bill History =====
+
+function loadBillHistory() {
+
+    const bills = getBills();
+
+    const tbody =
+        document.getElementById(
+            "billHistoryTable"
+        );
+
+    tbody.innerHTML = "";
+
+
+    bills
+        .slice()
+        .reverse()
+        .forEach(bill => {
+
+            tbody.innerHTML += `
+
+            <tr>
+
+                <td>${bill.date}</td>
+
+                <td>${bill.time}</td>
+
+                <td>${bill.customerName}</td>
+
+                <td>
+                    ₹ ${bill.grandTotal.toFixed(2)}
+                </td>
+
+            </tr>
+
+            `;
+
+        });
+
+}
+function searchBills() {
+
+    const text =
+        document
+        .getElementById("billSearch")
+        .value
+        .toLowerCase();
+
+    const rows =
+        document.querySelectorAll(
+            "#billHistoryTable tr"
+        );
+
+    rows.forEach(row => {
+
+        row.style.display =
+            row.innerText
+            .toLowerCase()
+            .includes(text)
+
+            ? ""
+
+            : "none";
+
+    });
+
+}

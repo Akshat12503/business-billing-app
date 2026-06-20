@@ -232,3 +232,31 @@ document
         window.print();
 
     });
+
+document
+    .getElementById("billHistoryBtn")
+    .addEventListener("click", () => {
+
+        const modal =
+            new bootstrap.Modal(
+
+                document.getElementById(
+                    "billHistoryModal"
+                )
+
+            );
+
+        loadBillHistory();
+
+        modal.show();
+
+    });
+
+
+
+document
+    .getElementById("billSearch")
+    .addEventListener(
+        "keyup",
+        searchBills
+    );
