@@ -341,83 +341,161 @@ function loadBillHistory() {
 
 function viewBill(index) {
 
+    selectedHistoryBillIndex = index;
+
     const bill = getBills()[index];
 
-    let message = "";
+    document.getElementById("billCustomer").innerText =
+        "Customer : " + bill.customerName;
 
-    message +=
-        `Customer : ${bill.customerName}\n\n`;
+    document.getElementById("billDate").innerText =
+        "Date : " + bill.date;
+
+    document.getElementById("billTime").innerText =
+        "Time : " + bill.time;
+
+
+    const tbody =
+        document.getElementById(
+            "billDetailsTable"
+        );
+
+    tbody.innerHTML = "";
+
 
     bill.items.forEach((item, i) => {
 
-        message +=
+        tbody.innerHTML += `
 
-            `${i + 1}. ${item.name}\n` +
+        <tr>
 
-            `${item.quantity.toFixed(3)} ${item.unit}` +
+            <td>${i + 1}</td>
 
-            ` × ₹${item.rate.toFixed(2)}` +
+            <td>${item.name}</td>
 
-            ` = ₹${item.total.toFixed(2)}\n\n`;
+            <td>
+
+                ${item.quantity.toFixed(3)}
+
+                ${item.unit}
+
+            </td>
+
+            <td>
+
+                ₹ ${item.rate.toFixed(2)}
+
+            </td>
+
+            <td>
+
+                ₹ ${item.total.toFixed(2)}
+
+            </td>
+
+        </tr>
+
+        `;
 
     });
 
 
-    message +=
+    document.getElementById(
+        "billDetailsGrandTotal"
+    ).innerText =
+        bill.grandTotal.toFixed(2);
 
-        `Grand Total : ₹${bill.grandTotal.toFixed(2)}`;
 
+    const modal = new bootstrap.Modal(
 
-    alert(message);
+        document.getElementById(
+            "billDetailsModal"
+        )
+
+    );
+
+    modal.show();
 
 }
 
-// ===== Delete Bill =====
+// ===== Delete Bill From Modal =====
 
-function deleteBill(index) {
+function deleteBillFromModal() {
 
-    if (!confirm("Delete this bill?"))
-        return;
+    if (
+
+        selectedHistoryBillIndex === null
+
+    ) return;
+
+
+    if (
+
+        !confirm("Delete this bill ?")
+
+    ) return;
+
 
     const bills = getBills();
 
-    bills.splice(index, 1);
+    bills.splice(
+
+        selectedHistoryBillIndex,
+
+        1
+
+    );
 
     saveBills(bills);
 
+    selectedHistoryBillIndex = null;
+
     loadBillHistory();
+
+    bootstrap.Modal
+        .getInstance(
+            document.getElementById(
+                "billDetailsModal"
+            )
+        )
+        .hide();
 
 }
 
-// ===== Search Bills =====
+// ===== WhatsApp Share =====
 
-function searchBills() {
+function shareBillOnWhatsapp() {
 
-    const searchText =
-        document
-        .getElementById("billSearch")
-        .value
-        .toLowerCase();
+    if (selectedHistoryBillIndex === null)
+        return;
 
+    const bill =
+        getBills()[selectedHistoryBillIndex];
 
-    const rows =
-        document.querySelectorAll(
-            "#billHistoryTable tr"
-        );
+    let message =
 
+`Hello ${bill.customerName},
 
-    rows.forEach(row => {
+Thank you for your purchase.
 
-        row.style.display =
+Bill Date : ${bill.date}
+Bill Time : ${bill.time}
 
-            row.innerText
-                .toLowerCase()
-                .includes(searchText)
+Bill Amount : ₹${bill.grandTotal.toFixed(2)}
 
-                ? ""
+Please find your invoice attached.
 
-                : "none";
+Thank you.`;
 
-    });
+    const url =
+
+        "https://wa.me/?text=" +
+
+        encodeURIComponent(message);
+
+    window.open(
+        url,
+        "_blank"
+    );
 
 }

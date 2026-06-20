@@ -287,3 +287,32 @@ document
         "keyup",
         searchBills
     );
+
+// ===== Delete Bill From Modal =====
+
+document
+    .getElementById("historyDeleteBtn")
+    .addEventListener(
+        "click",
+        deleteBillFromModal
+    );
+
+// ===== PDF From Bill History =====
+
+document
+    .getElementById("historyPdfBtn")
+    .addEventListener(
+        "click",
+        generatePDFFromHistory
+    );
+
+// ===== WhatsApp Share =====
+
+document
+    .getElementById(
+        "historyWhatsappBtn"
+    )
+    .addEventListener(
+        "click",
+        shareBillOnWhatsapp
+    );

@@ -1,67 +1,29 @@
-function generatePDF() {
-
-    if (currentBill.length === 0) {
-
-        alert("Bill is empty.");
-
-        return;
-
-    }
-
-    const customerName =
-        document.getElementById("customerName")
-        .value
-        .trim();
-
-    if (customerName === "") {
-
-        alert("Enter customer name.");
-
-        return;
-
-    }
-
-    const sellerType =
-        document.getElementById("sellerType")
-        .value;
-
-    const now = new Date();
-
-    const date =
-        now.toLocaleDateString("en-GB");
-
-    const time =
-        now.toLocaleTimeString();
+function createBillPDF(bill) {
 
     const { jsPDF } = window.jspdf;
 
     const doc = new jsPDF();
 
-
     // Header
 
     doc.setFontSize(18);
+
     doc.setFont("helvetica", "bold");
 
     doc.text("BILL RECEIPT", 80, 15);
 
     doc.setFontSize(11);
+
     doc.setFont("helvetica", "normal");
 
-    doc.text(`Date : ${date}`, 14, 30);
+    doc.text(`Date : ${bill.date}`, 14, 30);
 
-    doc.text(`Time : ${time}`, 14, 38);
+    doc.text(`Time : ${bill.time}`, 14, 38);
 
     doc.text(
-        `Customer : ${customerName}`,
+        `Customer : ${bill.customerName}`,
         14,
         46
-    );
-
-    doc.text(
-        `Seller Type : ${sellerType}`,
-        14,
-        54
     );
 
 
@@ -71,8 +33,7 @@ function generatePDF() {
 
     let grandTotal = 0;
 
-
-    currentBill.forEach((item, index) => {
+    bill.items.forEach((item, index) => {
 
         rows.push([
 
@@ -95,7 +56,7 @@ function generatePDF() {
 
     doc.autoTable({
 
-        startY: 65,
+        startY: 60,
 
         head: [[
 
@@ -124,31 +85,102 @@ function generatePDF() {
     });
 
 
-    // Grand Total
-
     doc.setFontSize(14);
 
     doc.setFont("helvetica", "bold");
 
     doc.text(
 
-        `Grand Total : Rs ${grandTotal.toFixed(2)}`,
+        `Grand Total : ₹ ${grandTotal.toFixed(2)}`,
 
-        130,
+        120,
 
         doc.lastAutoTable.finalY + 15
 
     );
 
 
-    // Filename
-
     const formattedDate =
-        date.replaceAll("/", "-");
+        bill.date.replaceAll("/", "-");
 
     const fileName =
-        `${customerName}_${formattedDate}.pdf`;
+        `${bill.customerName}_${formattedDate}.pdf`;
 
     doc.save(fileName);
+
+}
+
+function generatePDF() {
+
+    if (currentBill.length === 0) {
+
+        alert("Bill is empty.");
+
+        return;
+
+    }
+
+    const customerName =
+        document
+        .getElementById("customerName")
+        .value
+        .trim();
+
+    if (customerName === "") {
+
+        alert("Enter customer name.");
+
+        return;
+
+    }
+
+
+    const now = new Date();
+
+    const bill = {
+
+        date:
+            now.toLocaleDateString("en-GB"),
+
+        time:
+            now.toLocaleTimeString(),
+
+        customerName,
+
+        items: currentBill,
+
+        grandTotal:
+            Number(
+                document
+                .getElementById("grandTotal")
+                .innerText
+            )
+
+    };
+
+
+    createBillPDF(bill);
+
+}
+
+// ===== Generate PDF From History =====
+
+function generatePDFFromHistory() {
+
+    if (
+
+        selectedHistoryBillIndex === null
+
+    ) return;
+
+
+    const bill =
+
+        getBills()[
+            selectedHistoryBillIndex
+        ];
+
+
+    createBillPDF(bill);
 
 }
