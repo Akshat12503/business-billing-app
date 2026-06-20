@@ -273,3 +273,151 @@ function searchBills() {
     });
 
 }
+
+// ===== Load Bill History =====
+
+function loadBillHistory() {
+
+    const bills = getBills();
+
+    const tbody =
+        document.getElementById("billHistoryTable");
+
+    tbody.innerHTML = "";
+
+
+    bills
+        .slice()
+        .reverse()
+        .forEach((bill, reverseIndex) => {
+
+            const actualIndex =
+                bills.length - 1 - reverseIndex;
+
+            tbody.innerHTML += `
+
+            <tr>
+
+                <td>${bill.date}</td>
+
+                <td>${bill.time}</td>
+
+                <td>${bill.customerName}</td>
+
+                <td>
+                    ₹ ${bill.grandTotal.toFixed(2)}
+                </td>
+
+                <td>
+
+                    <button
+                        class="btn btn-primary btn-sm"
+                        onclick="viewBill(${actualIndex})">
+
+                        View
+
+                    </button>
+
+
+                    <button
+                        class="btn btn-danger btn-sm"
+                        onclick="deleteBill(${actualIndex})">
+
+                        Delete
+
+                    </button>
+
+                </td>
+
+            </tr>
+
+            `;
+
+        });
+
+}
+
+// ===== View Bill =====
+
+function viewBill(index) {
+
+    const bill = getBills()[index];
+
+    let message = "";
+
+    message +=
+        `Customer : ${bill.customerName}\n\n`;
+
+    bill.items.forEach((item, i) => {
+
+        message +=
+
+            `${i + 1}. ${item.name}\n` +
+
+            `${item.quantity.toFixed(3)} ${item.unit}` +
+
+            ` × ₹${item.rate.toFixed(2)}` +
+
+            ` = ₹${item.total.toFixed(2)}\n\n`;
+
+    });
+
+
+    message +=
+
+        `Grand Total : ₹${bill.grandTotal.toFixed(2)}`;
+
+
+    alert(message);
+
+}
+
+// ===== Delete Bill =====
+
+function deleteBill(index) {
+
+    if (!confirm("Delete this bill?"))
+        return;
+
+    const bills = getBills();
+
+    bills.splice(index, 1);
+
+    saveBills(bills);
+
+    loadBillHistory();
+
+}
+
+// ===== Search Bills =====
+
+function searchBills() {
+
+    const searchText =
+        document
+        .getElementById("billSearch")
+        .value
+        .toLowerCase();
+
+
+    const rows =
+        document.querySelectorAll(
+            "#billHistoryTable tr"
+        );
+
+
+    rows.forEach(row => {
+
+        row.style.display =
+
+            row.innerText
+                .toLowerCase()
+                .includes(searchText)
+
+                ? ""
+
+                : "none";
+
+    });
+
+}

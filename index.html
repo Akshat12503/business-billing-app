@@ -255,6 +255,13 @@
 
                         </button>
 
+                        <button
+                            class="btn btn-info"
+                            id="billHistoryBtn">
+
+                            Bill History
+
+                        </button>
 
                         <button
                             class="btn btn-dark"
@@ -280,10 +287,6 @@
 
                             Clear Bill
 
-                        </button>
-
-                        <button class="btn btn-info" id="billHistoryBtn">
-                            Bill History
                         </button>
 
                     </div>
@@ -537,6 +540,79 @@
                             <th>Time</th>
                             <th>Customer</th>
                             <th>Total</th>
+
+                        </tr>
+
+                        </thead>
+
+                        <tbody id="billHistoryTable">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Bill History Modal -->
+
+<div
+    class="modal fade"
+    id="billHistoryModal"
+    tabindex="-1">
+
+    <div class="modal-dialog modal-xl">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+
+                    Bill History
+
+                </h5>
+
+                <button
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <!-- Search -->
+
+                <input
+                    class="form-control mb-3"
+                    id="billSearch"
+                    placeholder="Search customer or date">
+
+
+                <!-- Table -->
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered">
+
+                        <thead>
+
+                        <tr>
+
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>Actions</th>
 
                         </tr>
 

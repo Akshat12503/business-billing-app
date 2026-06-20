@@ -132,7 +132,7 @@ function generatePDF() {
 
     doc.text(
 
-        `Grand Total : ₹ ${grandTotal.toFixed(2)}`,
+        `Grand Total : Rs ${grandTotal.toFixed(2)}`,
 
         130,
 

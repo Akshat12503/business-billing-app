@@ -260,3 +260,30 @@ document
         "keyup",
         searchBills
     );
+
+// ===== Bill History =====
+
+document
+    .getElementById("billHistoryBtn")
+    .addEventListener("click", () => {
+
+        loadBillHistory();
+
+        const modal = new bootstrap.Modal(
+            document.getElementById(
+                "billHistoryModal"
+            )
+        );
+
+        modal.show();
+
+    });
+
+// ===== Search Bills =====
+
+document
+    .getElementById("billSearch")
+    .addEventListener(
+        "keyup",
+        searchBills
+    );
