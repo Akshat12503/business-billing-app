@@ -1,27 +1,30 @@
-/* General */
+/* ===== BASE ===== */
 
 body {
-    background-color: #f5f5f5;
+    background-color: #f0f2f5;
     font-family: Arial, sans-serif;
 }
 
 
-/* Cards */
+/* ===== CARDS ===== */
 
 .card {
     border: none;
     border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
 .card-header {
     font-weight: bold;
+    font-size: 15px;
     background-color: #0d6efd;
     color: white;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 10px 16px;
 }
 
 
-/* Table */
+/* ===== TABLE ===== */
 
 table {
     background-color: white;
@@ -29,29 +32,32 @@ table {
 
 th {
     vertical-align: middle;
+    background-color: #f8f9fa;
+    font-size: 14px;
 }
 
 td {
     vertical-align: middle;
+    font-size: 14px;
 }
 
 
-/* Grand Total */
+/* ===== GRAND TOTAL ===== */
 
 #grandTotal {
-    color: green;
+    color: #198754;
     font-weight: bold;
 }
 
 
-/* Buttons */
+/* ===== BUTTONS ===== */
 
 button {
     border-radius: 8px !important;
 }
 
 
-/* Inputs */
+/* ===== INPUTS ===== */
 
 .form-control,
 .form-select {
@@ -59,31 +65,109 @@ button {
 }
 
 
-/* Mobile */
+/* ===== MODAL ===== */
 
-@media (max-width: 991px) {
+.modal-header {
+    background-color: #0d6efd;
+    color: white;
+}
 
-    .col-lg-4 {
-        margin-bottom: 20px;
-    }
-
+.modal-header .btn-close {
+    filter: invert(1);
 }
 
 
-/* Small Devices */
+/* ===== RESPONSIVE: TABLET / MOBILE ===== */
+
+@media (max-width: 991px) {
+    .col-lg-4 {
+        margin-bottom: 20px;
+    }
+}
 
 @media (max-width: 576px) {
-
     .card-body {
-        padding: 1rem;
+        padding: 0.75rem;
     }
 
     table {
-        font-size: 13px;
+        font-size: 12px;
+    }
+
+    th, td {
+        font-size: 12px;
+        padding: 6px 4px;
     }
 
     h3 {
-        font-size: 20px;
+        font-size: 18px;
     }
 
+    .btn {
+        font-size: 13px;
+        padding: 6px 10px;
+    }
+}
+
+
+/* ===== PRINT STYLES ===== */
+/* Hides everything except the bill table when using window.print() */
+
+@media print {
+
+    body * {
+        visibility: hidden;
+    }
+
+    /* Show only the bill card area */
+    .col-lg-8,
+    .col-lg-8 * {
+        visibility: visible;
+    }
+
+    .col-lg-8 {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+
+    /* Hide action buttons when printing */
+    .d-flex.flex-wrap.gap-2 {
+        display: none !important;
+    }
+
+    /* Hide the Remove column */
+    th:last-child,
+    td:last-child {
+        display: none;
+    }
+
+    .card {
+        box-shadow: none;
+        border: none;
+    }
+
+    .card-header {
+        background-color: white !important;
+        color: black !important;
+        font-size: 18px;
+        text-align: center;
+        border-bottom: 2px solid black;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    th, td {
+        border: 1px solid black !important;
+        padding: 5px 8px;
+    }
+
+    #grandTotal {
+        color: black;
+    }
 }
