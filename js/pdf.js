@@ -15,7 +15,7 @@ function createBillPDF(bill) {
 
     doc.setFontSize(20);
     doc.setFont("helvetica", "bold");
-    doc.text("BILL RECEIPT", centerX, 18, { align: "center" });
+    doc.text("ESTIMATION", centerX, 18, { align: "center" });
 
     // Divider line under title
     doc.setLineWidth(0.5);
