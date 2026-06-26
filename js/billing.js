@@ -179,6 +179,9 @@ function addItemToBill() {
         total
     });
 
+    // Auto-reduce stock when item is added to bill
+    reduceStock(product.id, quantity);
+
     renderBill();
 
     document.getElementById("quantity").value = "";
@@ -384,6 +387,9 @@ function confirmEditQty(index) {
 // ===== Remove Item =====
 
 function removeItem(index) {
+    const item = currentBill[index];
+    // Restore stock when item is removed from bill
+    addStock(item.productId, item.quantity);
     currentBill.splice(index, 1);
     renderBill();
 }

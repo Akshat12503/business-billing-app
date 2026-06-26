@@ -3,6 +3,7 @@
 const CATEGORY_KEY = "billing_categories";
 const PRODUCT_KEY  = "billing_products";
 const BILL_KEY     = "billing_bills";
+const STOCK_KEY    = "billing_stock";
 
 
 // ===== Initialize with Sample Data =====
@@ -46,6 +47,10 @@ function initializeStorage() {
         localStorage.setItem(BILL_KEY, JSON.stringify([]));
     }
 
+    if (!localStorage.getItem(STOCK_KEY)) {
+        localStorage.setItem(STOCK_KEY, JSON.stringify({}));
+    }
+
 }
 
 
@@ -70,7 +75,6 @@ function saveProducts(products) {
     localStorage.setItem(PRODUCT_KEY, JSON.stringify(products));
 }
 
-// Update a single product in storage by ID
 function updateProduct(id, name, category, unit, localRate, generalRate, retailRate) {
     const products = getProducts();
     const index = products.findIndex(p => p.id == id);
@@ -101,9 +105,55 @@ function saveBills(bills) {
 }
 
 
+// ===== Stock =====
+// Stock is stored as { productId: quantity, ... }
+
+function getStock() {
+    return JSON.parse(localStorage.getItem(STOCK_KEY)) || {};
+}
+
+function saveStock(stock) {
+    localStorage.setItem(STOCK_KEY, JSON.stringify(stock));
+}
+
+// Get stock level for a single product (returns 0 if never set)
+function getStockById(productId) {
+    const stock = getStock();
+    return stock[productId] !== undefined ? stock[productId] : 0;
+}
+
+// Add stock manually (purchase/receive goods)
+function addStock(productId, qty) {
+    const stock = getStock();
+    stock[productId] = parseFloat(((stock[productId] || 0) + qty).toFixed(3));
+    saveStock(stock);
+}
+
+// Reduce stock when a bill item is added
+function reduceStock(productId, qty) {
+    const stock = getStock();
+    const current = stock[productId] || 0;
+    stock[productId] = parseFloat((current - qty).toFixed(3));
+    saveStock(stock);
+}
+
+// Set stock to a specific value (for manual correction)
+function setStock(productId, qty) {
+    const stock = getStock();
+    stock[productId] = parseFloat(qty.toFixed(3));
+    saveStock(stock);
+}
+
+// Remove stock entry when a product is deleted
+function removeStockEntry(productId) {
+    const stock = getStock();
+    delete stock[productId];
+    saveStock(stock);
+}
+
+
 // ===== Helpers =====
 
-// Generates the next product ID (increments from last)
 function generateProductId() {
     const products = getProducts();
     if (products.length === 0) return 1;
@@ -117,7 +167,8 @@ function exportData() {
     const backupData = {
         categories: getCategories(),
         products:   getProducts(),
-        bills:      getBills()
+        bills:      getBills(),
+        stock:      getStock()
     };
 
     const blob = new Blob(
@@ -125,10 +176,10 @@ function exportData() {
         { type: "application/json" }
     );
 
-    const link     = document.createElement("a");
-    link.href      = URL.createObjectURL(blob);
-    const date     = new Date().toLocaleDateString("en-GB").replaceAll("/", "-");
-    link.download  = `Backup_${date}.json`;
+    const link    = document.createElement("a");
+    link.href     = URL.createObjectURL(blob);
+    const date    = new Date().toLocaleDateString("en-GB").replaceAll("/", "-");
+    link.download = `Backup_${date}.json`;
     link.click();
 }
 
@@ -145,6 +196,7 @@ function importData(file) {
             if (data.categories) saveCategories(data.categories);
             if (data.products)   saveProducts(data.products);
             if (data.bills)      saveBills(data.bills);
+            if (data.stock)      saveStock(data.stock);
 
             alert("Data imported successfully.");
             location.reload();

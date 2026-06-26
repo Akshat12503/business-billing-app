@@ -85,6 +85,19 @@ document.addEventListener("DOMContentLoaded", () => {
     // ── Product Management ────────────────────────────────
 
     document
+        .getElementById("stockBtn")
+        .addEventListener("click", () => {
+            loadStockOverview();
+            new bootstrap.Modal(
+                document.getElementById("stockModal")
+            ).show();
+        });
+
+    document
+        .getElementById("stockSearch")
+        .addEventListener("keyup", filterStockTable);
+
+    document
         .getElementById("manageProductsBtn")
         .addEventListener("click", () => {
             loadCategories();

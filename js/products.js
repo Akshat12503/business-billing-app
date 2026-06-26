@@ -347,6 +347,7 @@ function deleteProduct(productId) {
 
     const products = getProducts().filter(p => p.id != productId);
     saveProducts(products);
+    removeStockEntry(productId);
     loadProductTable();
 
 }
