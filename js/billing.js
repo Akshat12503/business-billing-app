@@ -404,11 +404,6 @@ function saveBill() {
 
     const customerName = document.getElementById("customerName").value.trim();
 
-    if (!customerName) {
-        alert("Enter customer name before saving.");
-        return;
-    }
-
     if (currentBill.length === 0) {
         alert("Add at least one item before saving.");
         return;
@@ -441,11 +436,6 @@ function shareCurrentBillOnWhatsapp() {
 
     const customerName = document.getElementById("customerName").value.trim();
 
-    if (!customerName) {
-        alert("Enter customer name first.");
-        return;
-    }
-
     if (currentBill.length === 0) {
         alert("Bill is empty.");
         return;
@@ -461,13 +451,14 @@ function shareCurrentBillOnWhatsapp() {
         itemLines += `${i + 1}. ${item.name} - ${item.quantity.toFixed(3)} ${item.unit} x Rs${item.rate.toFixed(2)} = Rs${item.total.toFixed(2)}\n`;
     });
 
+    const customerLine = customerName ? `Customer : ${customerName}\n` : "";
+
     const message =
 `BILL RECEIPT
 --------------------
 Date     : ${dateStr}
 Time     : ${timeStr}
-Customer : ${customerName}
---------------------
+${customerLine}--------------------
 Items :
 ${itemLines}--------------------
 Grand Total : Rs ${grandTotal}

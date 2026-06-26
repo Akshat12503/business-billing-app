@@ -1,33 +1,35 @@
 // ===== Core PDF Builder =====
-// Accepts a bill object and generates + downloads a PDF
-// File name format: CustomerName_DD-MM-YYYY.pdf
 
 function createBillPDF(bill) {
 
     const { jsPDF } = window.jspdf;
     const doc       = new jsPDF({ unit: "mm", format: "a4" });
 
-    const pageWidth  = doc.internal.pageSize.getWidth();
-    const margin     = 14;
-    const centerX    = pageWidth / 2;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin    = 14;
+    const centerX   = pageWidth / 2;
 
     // ── Header ──────────────────────────────────────────────
 
     doc.setFontSize(20);
     doc.setFont("helvetica", "bold");
-    doc.text("ESTIMATION", centerX, 18, { align: "center" });
+    doc.text("BILL RECEIPT", centerX, 18, { align: "center" });
 
-    // Divider line under title
     doc.setLineWidth(0.5);
     doc.line(margin, 22, pageWidth - margin, 22);
 
-    // Bill info block
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
 
-    doc.text(`Date     : ${bill.date}`,         margin, 30);
-    doc.text(`Time     : ${bill.time}`,         margin, 37);
-    doc.text(`Customer : ${bill.customerName}`, margin, 44);
+    doc.text(`Date : ${bill.date}`, margin, 30);
+    doc.text(`Time : ${bill.time}`, margin, 37);
+
+    let tableStartY = 45;
+
+    if (bill.customerName) {
+        doc.text(`Customer : ${bill.customerName}`, margin, 44);
+        tableStartY = 52;
+    }
 
     // ── Items Table ──────────────────────────────────────────
 
@@ -40,20 +42,20 @@ function createBillPDF(bill) {
     ]);
 
     doc.autoTable({
-        startY: 52,
+        startY: tableStartY,
         head: [["S.No", "Item", "Qty / Weight", "Rate", "Total"]],
         body: rows,
         theme: "grid",
         headStyles: {
-            fillColor:  [30, 30, 30],
-            textColor:  255,
+            fillColor: [30, 30, 30],
+            textColor: 255,
             fontStyle:  "bold",
             fontSize:   10,
             halign:     "center"
         },
         bodyStyles: {
-            fontSize:   10,
-            textColor:  [20, 20, 20]
+            fontSize:  10,
+            textColor: [20, 20, 20]
         },
         columnStyles: {
             0: { halign: "center", cellWidth: 14 },
@@ -73,7 +75,6 @@ function createBillPDF(bill) {
 
     const finalY = doc.lastAutoTable.finalY + 8;
 
-    // Divider line above grand total
     doc.setLineWidth(0.4);
     doc.line(margin, finalY - 2, pageWidth - margin, finalY - 2);
 
@@ -96,12 +97,9 @@ function createBillPDF(bill) {
 
     // ── Save ─────────────────────────────────────────────────
 
-    // File name: CustomerName_DD-MM-YYYY.pdf
-    const safeName    = bill.customerName.replace(/\s+/g, "");
+    const safeName      = (bill.customerName || "Bill").replace(/\s+/g, "");
     const formattedDate = bill.date.replaceAll("/", "-");
-    const fileName    = `${safeName}_${formattedDate}.pdf`;
-
-    doc.save(fileName);
+    doc.save(`${safeName}_${formattedDate}.pdf`);
 
 }
 
@@ -115,23 +113,14 @@ function generatePDF() {
         return;
     }
 
-    const customerName = document.getElementById("customerName").value.trim();
-
-    if (!customerName) {
-        alert("Enter customer name.");
-        return;
-    }
-
     const now = new Date();
 
     const bill = {
         date:         now.toLocaleDateString("en-GB"),
         time:         now.toLocaleTimeString(),
-        customerName,
+        customerName: document.getElementById("customerName").value.trim(),
         items:        currentBill,
-        grandTotal:   parseFloat(
-                          document.getElementById("grandTotal").innerText
-                      )
+        grandTotal:   parseFloat(document.getElementById("grandTotal").innerText)
     };
 
     createBillPDF(bill);
