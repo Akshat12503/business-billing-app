@@ -73,7 +73,18 @@ function renderBill() {
         row.innerHTML = `
             <td>${index + 1}</td>
             <td class="text-start">${escapeHtml(item.name)}</td>
-            <td>${item.quantity.toFixed(3)} ${item.unit}</td>
+            <td id="qty-cell-${index}">
+                <div class="d-flex align-items-center justify-content-center gap-1">
+                    <span>${item.quantity.toFixed(3)} ${item.unit}</span>
+                    <button
+                        class="btn btn-sm btn-outline-secondary p-0 px-1"
+                        style="line-height:1.2; font-size:12px;"
+                        title="Edit quantity"
+                        onclick="startEditQty(${index})">
+                        ✏️
+                    </button>
+                </div>
+            </td>
             <td id="rate-cell-${index}">
                 <div class="d-flex align-items-center justify-content-center gap-1">
                     <span id="rate-display-${index}">₹ ${item.rate.toFixed(2)}</span>
@@ -162,6 +173,70 @@ function confirmEditRate(index) {
     currentBill[index].rate  = newRate;
     currentBill[index].total = parseFloat(
         (currentBill[index].quantity * newRate).toFixed(2)
+    );
+
+    renderBill();
+
+}
+
+
+// ===== Edit Qty Inline =====
+
+function startEditQty(index) {
+
+    const item    = currentBill[index];
+    const qtyCell = document.getElementById(`qty-cell-${index}`);
+
+    qtyCell.innerHTML = `
+        <div class="d-flex align-items-center justify-content-center gap-1">
+            <input
+                type="number"
+                step="0.001"
+                id="qty-input-${index}"
+                class="form-control form-control-sm"
+                style="width: 90px;"
+                value="${item.quantity.toFixed(3)}">
+            <button
+                class="btn btn-sm btn-success p-0 px-1"
+                style="line-height:1.4; font-size:14px;"
+                title="Confirm"
+                onclick="confirmEditQty(${index})">
+                ✓
+            </button>
+            <button
+                class="btn btn-sm btn-secondary p-0 px-1"
+                style="line-height:1.4; font-size:14px;"
+                title="Cancel"
+                onclick="renderBill()">
+                ✕
+            </button>
+        </div>
+    `;
+
+    const input = document.getElementById(`qty-input-${index}`);
+    input.focus();
+    input.select();
+
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter")  confirmEditQty(index);
+        if (e.key === "Escape") renderBill();
+    });
+
+}
+
+function confirmEditQty(index) {
+
+    const input  = document.getElementById(`qty-input-${index}`);
+    const newQty = parseFloat(input.value);
+
+    if (isNaN(newQty) || newQty <= 0) {
+        alert("Enter a valid quantity.");
+        return;
+    }
+
+    currentBill[index].quantity = newQty;
+    currentBill[index].total    = parseFloat(
+        (newQty * currentBill[index].rate).toFixed(2)
     );
 
     renderBill();
