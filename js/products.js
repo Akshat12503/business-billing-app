@@ -1,26 +1,20 @@
 // ===== Load Category Dropdowns =====
-// Populates both the main bill form and the product modal
 
 function loadCategories() {
 
-    const categorySelect    = document.getElementById("categorySelect");
+    const categorySelect     = document.getElementById("categorySelect");
     const newProductCategory = document.getElementById("newProductCategory");
 
-    // Reset
     categorySelect.innerHTML     = '<option value="">Select Category</option>';
     newProductCategory.innerHTML = "";
 
-    const categories = getCategories();
+    getCategories().forEach(category => {
 
-    categories.forEach(category => {
-
-        // Main bill dropdown
         const opt1       = document.createElement("option");
         opt1.value       = category;
         opt1.textContent = category;
         categorySelect.appendChild(opt1);
 
-        // Modal dropdown
         const opt2       = document.createElement("option");
         opt2.value       = category;
         opt2.textContent = category;
@@ -28,15 +22,137 @@ function loadCategories() {
 
     });
 
+    loadCategoryTable();
+
+}
+
+
+// ===== Category Management Table =====
+
+function loadCategoryTable() {
+
+    const tbody = document.getElementById("categoryTableBody");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    const categories = getCategories();
+
+    if (categories.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="2" class="text-center text-muted py-2">
+                    No categories yet.
+                </td>
+            </tr>`;
+        return;
+    }
+
+    categories.forEach((category, index) => {
+
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>
+                <input class="form-control form-control-sm"
+                    id="cat-${index}"
+                    value="${escapeHtml(category)}">
+            </td>
+            <td style="white-space:nowrap">
+                <button class="btn btn-success btn-sm me-1"
+                    onclick="renameCategory(${index})">
+                    Save
+                </button>
+                <button class="btn btn-danger btn-sm"
+                    onclick="deleteCategory(${index})">
+                    Delete
+                </button>
+            </td>
+        `;
+
+        tbody.appendChild(row);
+
+    });
+
+}
+
+
+// ===== Rename Category =====
+
+function renameCategory(index) {
+
+    const newName = document.getElementById(`cat-${index}`).value.trim();
+
+    if (!newName) {
+        alert("Category name cannot be empty.");
+        return;
+    }
+
+    const categories = getCategories();
+    const oldName    = categories[index];
+
+    if (newName === oldName) return;
+
+    const duplicate = categories.some(
+        (c, i) => i !== index && c.toLowerCase() === newName.toLowerCase()
+    );
+
+    if (duplicate) {
+        alert("A category with that name already exists.");
+        return;
+    }
+
+    // Rename the category
+    categories[index] = newName;
+    saveCategories(categories);
+
+    // Also update all products that had the old category name
+    const products = getProducts().map(p => {
+        if (p.category === oldName) p.category = newName;
+        return p;
+    });
+    saveProducts(products);
+
+    loadCategories();
+    loadProductTable();
+
+    alert(`Category renamed to "${newName}".`);
+
+}
+
+
+// ===== Delete Category =====
+
+function deleteCategory(index) {
+
+    const categories = getCategories();
+    const name       = categories[index];
+
+    const hasProducts = getProducts().some(p => p.category === name);
+
+    if (hasProducts) {
+        if (!confirm(`"${name}" has products assigned to it. Deleting it will also delete those products. Continue?`)) return;
+        // Remove all products in this category
+        const products = getProducts().filter(p => p.category !== name);
+        saveProducts(products);
+    } else {
+        if (!confirm(`Delete category "${name}"?`)) return;
+    }
+
+    categories.splice(index, 1);
+    saveCategories(categories);
+
+    loadCategories();
+    loadProductTable();
+
 }
 
 
 // ===== Load Products Dropdown =====
-// Filters by selected category
 
 function loadProducts() {
 
-    const category     = document.getElementById("categorySelect").value;
+    const category    = document.getElementById("categorySelect").value;
     const productSelect = document.getElementById("productSelect");
 
     productSelect.innerHTML = '<option value="">Select Product</option>';
@@ -78,6 +194,11 @@ function loadProductTable() {
 
         const row = document.createElement("tr");
 
+        // Build category options dynamically so dropdown reflects current categories
+        const categoryOptions = getCategories().map(cat =>
+            `<option value="${escapeHtml(cat)}" ${cat === product.category ? "selected" : ""}>${escapeHtml(cat)}</option>`
+        ).join("");
+
         row.innerHTML = `
             <td>${product.id}</td>
 
@@ -88,9 +209,9 @@ function loadProductTable() {
             </td>
 
             <td>
-                <input class="form-control form-control-sm"
-                    id="category-${product.id}"
-                    value="${escapeHtml(product.category)}">
+                <select class="form-select form-select-sm" id="category-${product.id}">
+                    ${categoryOptions}
+                </select>
             </td>
 
             <td>
@@ -118,7 +239,7 @@ function loadProductTable() {
                     value="${product.retailRate}">
             </td>
 
-            <td>
+            <td style="white-space:nowrap">
                 <button class="btn btn-success btn-sm mb-1"
                     onclick="saveProductChanges(${product.id})">
                     Save
@@ -165,9 +286,6 @@ function addCategory(categoryName) {
     categories.push(categoryName);
     saveCategories(categories);
     loadCategories();
-    loadProductTable();
-
-    alert(`Category "${categoryName}" added.`);
 
 }
 
@@ -199,7 +317,7 @@ function addProduct(name, category, unit, localRate, generalRate, retailRate) {
 function saveProductChanges(productId) {
 
     const name        = document.getElementById(`name-${productId}`).value.trim();
-    const category    = document.getElementById(`category-${productId}`).value.trim();
+    const category    = document.getElementById(`category-${productId}`).value;
     const unit        = document.getElementById(`unit-${productId}`).value;
     const localRate   = Number(document.getElementById(`local-${productId}`).value);
     const generalRate = Number(document.getElementById(`general-${productId}`).value);
@@ -227,14 +345,14 @@ function deleteProduct(productId) {
 
     if (!confirm("Delete this product?")) return;
 
-    let products = getProducts().filter(p => p.id != productId);
+    const products = getProducts().filter(p => p.id != productId);
     saveProducts(products);
     loadProductTable();
 
 }
 
 
-// ===== Utility: Escape HTML to prevent XSS in inline inputs =====
+// ===== Utility =====
 
 function escapeHtml(str) {
     return String(str)

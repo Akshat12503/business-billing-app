@@ -1,7 +1,7 @@
 // ===== State =====
 
 let currentBill = [];
-let selectedHistoryBillIndex = null;   // tracks which saved bill is open in details modal
+let selectedHistoryBillIndex = null;
 
 
 // ===== Add Item to Current Bill =====
@@ -49,7 +49,6 @@ function addItemToBill() {
 
     renderBill();
 
-    // Clear only the quantity field, keep category/product selected for fast repeat entry
     document.getElementById("quantity").value = "";
     document.getElementById("quantity").focus();
 
@@ -75,8 +74,19 @@ function renderBill() {
             <td>${index + 1}</td>
             <td class="text-start">${escapeHtml(item.name)}</td>
             <td>${item.quantity.toFixed(3)} ${item.unit}</td>
-            <td>₹ ${item.rate.toFixed(2)}</td>
-            <td>₹ ${item.total.toFixed(2)}</td>
+            <td id="rate-cell-${index}">
+                <div class="d-flex align-items-center justify-content-center gap-1">
+                    <span id="rate-display-${index}">₹ ${item.rate.toFixed(2)}</span>
+                    <button
+                        class="btn btn-sm btn-outline-secondary p-0 px-1"
+                        style="line-height:1.2; font-size:12px;"
+                        title="Edit rate"
+                        onclick="startEditRate(${index})">
+                        ✏️
+                    </button>
+                </div>
+            </td>
+            <td id="total-cell-${index}">₹ ${item.total.toFixed(2)}</td>
             <td>
                 <button class="btn btn-danger btn-sm" onclick="removeItem(${index})">✕</button>
             </td>
@@ -87,6 +97,74 @@ function renderBill() {
     });
 
     document.getElementById("grandTotal").innerText = grandTotal.toFixed(2);
+
+}
+
+
+// ===== Edit Rate Inline =====
+
+function startEditRate(index) {
+
+    const item    = currentBill[index];
+    const rateCell = document.getElementById(`rate-cell-${index}`);
+
+    // Replace cell content with an input + confirm button
+    rateCell.innerHTML = `
+        <div class="d-flex align-items-center justify-content-center gap-1">
+            <input
+                type="number"
+                step="0.01"
+                id="rate-input-${index}"
+                class="form-control form-control-sm"
+                style="width: 90px;"
+                value="${item.rate.toFixed(2)}">
+            <button
+                class="btn btn-sm btn-success p-0 px-1"
+                style="line-height:1.4; font-size:14px;"
+                title="Confirm"
+                onclick="confirmEditRate(${index})">
+                ✓
+            </button>
+            <button
+                class="btn btn-sm btn-secondary p-0 px-1"
+                style="line-height:1.4; font-size:14px;"
+                title="Cancel"
+                onclick="renderBill()">
+                ✕
+            </button>
+        </div>
+    `;
+
+    // Focus and select the input
+    const input = document.getElementById(`rate-input-${index}`);
+    input.focus();
+    input.select();
+
+    // Allow pressing Enter to confirm
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter")  confirmEditRate(index);
+        if (e.key === "Escape") renderBill();
+    });
+
+}
+
+
+function confirmEditRate(index) {
+
+    const input   = document.getElementById(`rate-input-${index}`);
+    const newRate = parseFloat(input.value);
+
+    if (isNaN(newRate) || newRate < 0) {
+        alert("Enter a valid rate.");
+        return;
+    }
+
+    currentBill[index].rate  = newRate;
+    currentBill[index].total = parseFloat(
+        (currentBill[index].quantity * newRate).toFixed(2)
+    );
+
+    renderBill();
 
 }
 
@@ -168,21 +246,21 @@ function shareCurrentBillOnWhatsapp() {
 
     let itemLines = "";
     currentBill.forEach((item, i) => {
-        itemLines += `${i + 1}. ${item.name} — ${item.quantity.toFixed(3)} ${item.unit} × ₹${item.rate.toFixed(2)} = ₹${item.total.toFixed(2)}\n`;
+        itemLines += `${i + 1}. ${item.name} - ${item.quantity.toFixed(3)} ${item.unit} x Rs${item.rate.toFixed(2)} = Rs${item.total.toFixed(2)}\n`;
     });
 
     const message =
-`*BILL RECEIPT*
-━━━━━━━━━━━━━━━━━━━━
-📅 Date : ${dateStr}
-🕐 Time : ${timeStr}
-👤 Customer : ${customerName}
-━━━━━━━━━━━━━━━━━━━━
-*Items :*
-${itemLines}━━━━━━━━━━━━━━━━━━━━
-*Grand Total : ₹${grandTotal}*
-━━━━━━━━━━━━━━━━━━━━
-Thank you for your purchase! 🙏`;
+`BILL RECEIPT
+--------------------
+Date     : ${dateStr}
+Time     : ${timeStr}
+Customer : ${customerName}
+--------------------
+Items :
+${itemLines}--------------------
+Grand Total : Rs ${grandTotal}
+--------------------
+Thank you for your purchase!`;
 
     window.open(
         "https://wa.me/?text=" + encodeURIComponent(message),
@@ -346,21 +424,21 @@ function shareBillOnWhatsapp() {
 
     let itemLines = "";
     bill.items.forEach((item, i) => {
-        itemLines += `${i + 1}. ${item.name} — ${item.quantity.toFixed(3)} ${item.unit} × ₹${item.rate.toFixed(2)} = ₹${item.total.toFixed(2)}\n`;
+        itemLines += `${i + 1}. ${item.name} - ${item.quantity.toFixed(3)} ${item.unit} x Rs${item.rate.toFixed(2)} = Rs${item.total.toFixed(2)}\n`;
     });
 
     const message =
-`*BILL RECEIPT*
-━━━━━━━━━━━━━━━━━━━━
-📅 Date : ${bill.date}
-🕐 Time : ${bill.time}
-👤 Customer : ${bill.customerName}
-━━━━━━━━━━━━━━━━━━━━
-*Items :*
-${itemLines}━━━━━━━━━━━━━━━━━━━━
-*Grand Total : ₹${bill.grandTotal.toFixed(2)}*
-━━━━━━━━━━━━━━━━━━━━
-Thank you for your purchase! 🙏`;
+`BILL RECEIPT
+--------------------
+Date     : ${bill.date}
+Time     : ${bill.time}
+Customer : ${bill.customerName}
+--------------------
+Items :
+${itemLines}--------------------
+Grand Total : Rs ${bill.grandTotal.toFixed(2)}
+--------------------
+Thank you for your purchase!`;
 
     window.open(
         "https://wa.me/?text=" + encodeURIComponent(message),
