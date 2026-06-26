@@ -441,34 +441,29 @@ function shareCurrentBillOnWhatsapp() {
         return;
     }
 
-    const now        = new Date();
-    const dateStr    = now.toLocaleDateString("en-GB");
-    const timeStr    = now.toLocaleTimeString();
-    const grandTotal = document.getElementById("grandTotal").innerText;
+    const now = new Date();
 
-    let itemLines = "";
-    currentBill.forEach((item, i) => {
-        itemLines += `${i + 1}. ${item.name} - ${item.quantity.toFixed(3)} ${item.unit} x Rs${item.rate.toFixed(2)} = Rs${item.total.toFixed(2)}\n`;
-    });
+    const bill = {
+        date:         now.toLocaleDateString("en-GB"),
+        time:         now.toLocaleTimeString(),
+        customerName,
+        items:        currentBill,
+        grandTotal:   parseFloat(document.getElementById("grandTotal").innerText)
+    };
 
-    const customerLine = customerName ? `Customer : ${customerName}\n` : "";
+    // Step 1: Download the PDF
+    createBillPDF(bill);
 
-    const message =
-`BILL RECEIPT
---------------------
-Date     : ${dateStr}
-Time     : ${timeStr}
-${customerLine}--------------------
-Items :
-${itemLines}--------------------
-Grand Total : Rs ${grandTotal}
---------------------
-Thank you for your purchase!`;
+    // Step 2: Open WhatsApp after a short delay so the download starts first
+    const name    = customerName || "your order";
+    const message = `Hi, please find the bill for ${name} attached.`;
 
-    window.open(
-        "https://wa.me/?text=" + encodeURIComponent(message),
-        "_blank"
-    );
+    setTimeout(() => {
+        window.open(
+            "https://wa.me/?text=" + encodeURIComponent(message),
+            "_blank"
+        );
+    }, 800);
 
 }
 
@@ -625,27 +620,18 @@ function shareBillOnWhatsapp() {
 
     const bill = getBills()[selectedHistoryBillIndex];
 
-    let itemLines = "";
-    bill.items.forEach((item, i) => {
-        itemLines += `${i + 1}. ${item.name} - ${item.quantity.toFixed(3)} ${item.unit} x Rs${item.rate.toFixed(2)} = Rs${item.total.toFixed(2)}\n`;
-    });
+    // Step 1: Download the PDF
+    createBillPDF(bill);
 
-    const message =
-`BILL RECEIPT
---------------------
-Date     : ${bill.date}
-Time     : ${bill.time}
-Customer : ${bill.customerName}
---------------------
-Items :
-${itemLines}--------------------
-Grand Total : Rs ${bill.grandTotal.toFixed(2)}
---------------------
-Thank you for your purchase!`;
+    // Step 2: Open WhatsApp after a short delay so the download starts first
+    const name    = bill.customerName || "your order";
+    const message = `Hi, please find the bill for ${name} attached.`;
 
-    window.open(
-        "https://wa.me/?text=" + encodeURIComponent(message),
-        "_blank"
-    );
+    setTimeout(() => {
+        window.open(
+            "https://wa.me/?text=" + encodeURIComponent(message),
+            "_blank"
+        );
+    }, 800);
 
 }
