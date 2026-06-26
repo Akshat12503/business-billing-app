@@ -39,6 +39,21 @@
             <div class="card mb-3">
                 <div class="card-header">Add Product</div>
                 <div class="card-body">
+
+                    <!-- Search bar -->
+                    <div class="mb-3 position-relative">
+                        <label class="form-label">Search Product</label>
+                        <input
+                            type="text"
+                            id="productSearch"
+                            class="form-control"
+                            placeholder="Type product name..."
+                            autocomplete="off">
+                        <div id="searchResults" class="search-dropdown"></div>
+                    </div>
+
+                    <div class="divider-or text-muted mb-3">— or select manually —</div>
+
                     <div class="mb-3">
                         <label class="form-label">Category</label>
                         <select id="categorySelect" class="form-select">

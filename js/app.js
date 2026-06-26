@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Boot the UI
     loadCategories();
     loadProductTable();
+    initProductSearch();
 
     // ── Product Entry ─────────────────────────────────────
 

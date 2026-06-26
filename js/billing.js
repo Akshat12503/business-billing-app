@@ -4,16 +4,148 @@ let currentBill = [];
 let selectedHistoryBillIndex = null;
 
 
-// ===== Add Item to Current Bill =====
+// ===== Product Search =====
+
+function initProductSearch() {
+
+    const input   = document.getElementById("productSearch");
+    const results = document.getElementById("searchResults");
+    let activeIndex = -1;
+
+    input.addEventListener("input", () => {
+
+        const query = input.value.trim().toLowerCase();
+        activeIndex = -1;
+
+        if (!query) {
+            results.innerHTML = "";
+            results.classList.remove("open");
+            return;
+        }
+
+        const sellerType = document.getElementById("sellerType").value;
+        const matches    = getProducts().filter(p =>
+            p.name.toLowerCase().includes(query)
+        );
+
+        if (matches.length === 0) {
+            results.innerHTML = `<div class="search-no-results">No products found</div>`;
+            results.classList.add("open");
+            return;
+        }
+
+        results.innerHTML = matches.map((p, i) => {
+            const rate = sellerType === "local"   ? p.localRate
+                       : sellerType === "general" ? p.generalRate
+                       : p.retailRate;
+            return `
+                <div class="search-result-item"
+                    data-id="${p.id}"
+                    data-index="${i}"
+                    onmousedown="selectSearchProduct(${p.id})">
+                    <span class="item-name">${escapeHtml(p.name)}</span>
+                    <span class="item-meta">${p.category} &nbsp;|&nbsp; ₹${rate.toFixed(2)} / ${p.unit}</span>
+                </div>
+            `;
+        }).join("");
+
+        results.classList.add("open");
+
+    });
+
+    // Keyboard navigation
+    input.addEventListener("keydown", (e) => {
+
+        const items = results.querySelectorAll(".search-result-item");
+        if (!items.length) return;
+
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            activeIndex = Math.min(activeIndex + 1, items.length - 1);
+            items.forEach((el, i) => el.classList.toggle("active", i === activeIndex));
+            items[activeIndex]?.scrollIntoView({ block: "nearest" });
+        }
+
+        if (e.key === "ArrowUp") {
+            e.preventDefault();
+            activeIndex = Math.max(activeIndex - 1, 0);
+            items.forEach((el, i) => el.classList.toggle("active", i === activeIndex));
+            items[activeIndex]?.scrollIntoView({ block: "nearest" });
+        }
+
+        if (e.key === "Enter" && activeIndex >= 0) {
+            e.preventDefault();
+            const id = parseInt(items[activeIndex].dataset.id);
+            selectSearchProduct(id);
+        }
+
+        if (e.key === "Escape") {
+            closeSearch();
+        }
+
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+        if (!input.contains(e.target) && !results.contains(e.target)) {
+            closeSearch();
+        }
+    });
+
+}
+
+function selectSearchProduct(productId) {
+
+    const product    = getProductById(productId);
+    const sellerType = document.getElementById("sellerType").value;
+
+    if (!product) return;
+
+    const rate = sellerType === "local"   ? product.localRate
+               : sellerType === "general" ? product.generalRate
+               : product.retailRate;
+
+    // Show a small prompt for quantity
+    const qtyInput = document.getElementById("searchQtyInput");
+    const searchBox = document.getElementById("productSearch");
+    const results   = document.getElementById("searchResults");
+
+    // Fill the name in search bar as confirmation, close dropdown
+    searchBox.value = product.name;
+    results.innerHTML = "";
+    results.classList.remove("open");
+
+    // Highlight and focus quantity field
+    const qty = document.getElementById("quantity");
+    qty.value = "";
+    qty.focus();
+
+    // Store selected product id so Add Item button / Enter can use it
+    searchBox.dataset.selectedId = productId;
+
+}
+
+function closeSearch() {
+    const results = document.getElementById("searchResults");
+    results.innerHTML = "";
+    results.classList.remove("open");
+}
+
+// ===== Add Item (supports both search and dropdown) =====
 
 function addItemToBill() {
 
-    const sellerType = document.getElementById("sellerType").value;
-    const productId  = document.getElementById("productSelect").value;
-    const quantity   = parseFloat(document.getElementById("quantity").value);
+    const sellerType  = document.getElementById("sellerType").value;
+    const searchInput = document.getElementById("productSearch");
+    const searchId    = searchInput.dataset.selectedId;
+    const dropdownId  = document.getElementById("productSelect").value;
+
+    // Search bar takes priority if a product was selected from it
+    const productId = searchId || dropdownId;
+    const quantity  = parseFloat(document.getElementById("quantity").value);
 
     if (!productId) {
-        alert("Please select a product.");
+        alert("Please search or select a product.");
         return;
     }
 
@@ -51,6 +183,11 @@ function addItemToBill() {
 
     document.getElementById("quantity").value = "";
     document.getElementById("quantity").focus();
+
+    // Clear search bar selection
+    searchInput.value = "";
+    delete searchInput.dataset.selectedId;
+    closeSearch();
 
 }
 
