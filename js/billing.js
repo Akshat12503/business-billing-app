@@ -53,7 +53,6 @@ function initProductSearch() {
 
     });
 
-    // Keyboard navigation
     input.addEventListener("keydown", (e) => {
 
         const items = results.querySelectorAll(".search-result-item");
@@ -85,7 +84,6 @@ function initProductSearch() {
 
     });
 
-    // Close dropdown when clicking outside
     document.addEventListener("click", (e) => {
         if (!input.contains(e.target) && !results.contains(e.target)) {
             closeSearch();
@@ -96,31 +94,20 @@ function initProductSearch() {
 
 function selectSearchProduct(productId) {
 
-    const product    = getProductById(productId);
-    const sellerType = document.getElementById("sellerType").value;
-
-    if (!product) return;
-
-    const rate = sellerType === "local"   ? product.localRate
-               : sellerType === "general" ? product.generalRate
-               : product.retailRate;
-
-    // Show a small prompt for quantity
-    const qtyInput = document.getElementById("searchQtyInput");
+    const product  = getProductById(productId);
     const searchBox = document.getElementById("productSearch");
     const results   = document.getElementById("searchResults");
 
-    // Fill the name in search bar as confirmation, close dropdown
+    if (!product) return;
+
     searchBox.value = product.name;
     results.innerHTML = "";
     results.classList.remove("open");
 
-    // Highlight and focus quantity field
     const qty = document.getElementById("quantity");
     qty.value = "";
     qty.focus();
 
-    // Store selected product id so Add Item button / Enter can use it
     searchBox.dataset.selectedId = productId;
 
 }
@@ -131,7 +118,8 @@ function closeSearch() {
     results.classList.remove("open");
 }
 
-// ===== Add Item (supports both search and dropdown) =====
+
+// ===== Add Item =====
 
 function addItemToBill() {
 
@@ -140,7 +128,6 @@ function addItemToBill() {
     const searchId    = searchInput.dataset.selectedId;
     const dropdownId  = document.getElementById("productSelect").value;
 
-    // Search bar takes priority if a product was selected from it
     const productId = searchId || dropdownId;
     const quantity  = parseFloat(document.getElementById("quantity").value);
 
@@ -179,15 +166,11 @@ function addItemToBill() {
         total
     });
 
-    // Auto-reduce stock when item is added to bill
-    reduceStock(product.id, quantity);
-
     renderBill();
 
     document.getElementById("quantity").value = "";
     document.getElementById("quantity").focus();
 
-    // Clear search bar selection
     searchInput.value = "";
     delete searchInput.dataset.selectedId;
     closeSearch();
@@ -256,10 +239,9 @@ function renderBill() {
 
 function startEditRate(index) {
 
-    const item    = currentBill[index];
+    const item     = currentBill[index];
     const rateCell = document.getElementById(`rate-cell-${index}`);
 
-    // Replace cell content with an input + confirm button
     rateCell.innerHTML = `
         <div class="d-flex align-items-center justify-content-center gap-1">
             <input
@@ -286,19 +268,16 @@ function startEditRate(index) {
         </div>
     `;
 
-    // Focus and select the input
     const input = document.getElementById(`rate-input-${index}`);
     input.focus();
     input.select();
 
-    // Allow pressing Enter to confirm
     input.addEventListener("keydown", (e) => {
         if (e.key === "Enter")  confirmEditRate(index);
         if (e.key === "Escape") renderBill();
     });
 
 }
-
 
 function confirmEditRate(index) {
 
@@ -387,9 +366,6 @@ function confirmEditQty(index) {
 // ===== Remove Item =====
 
 function removeItem(index) {
-    const item = currentBill[index];
-    // Restore stock when item is removed from bill
-    addStock(item.productId, item.quantity);
     currentBill.splice(index, 1);
     renderBill();
 }
@@ -415,23 +391,25 @@ function saveBill() {
         return;
     }
 
-    const bills = getBills();
-    const now   = new Date();
+    const bills      = getBills();
+    const now        = new Date();
+    const billNumber = generateBillNumber();
 
     const bill = {
-        date:         now.toLocaleDateString("en-GB"),
-        time:         now.toLocaleTimeString(),
+        billNumber,
+        date:        now.toLocaleDateString("en-GB"),
+        time:        now.toLocaleTimeString(),
         customerName,
-        items:        currentBill,
-        grandTotal:   parseFloat(
-                          document.getElementById("grandTotal").innerText
-                      )
+        items:       currentBill,
+        grandTotal:  parseFloat(
+                         document.getElementById("grandTotal").innerText
+                     )
     };
 
     bills.push(bill);
     saveBills(bills);
 
-    alert("Bill saved successfully.");
+    alert(`Bill saved successfully. Bill No: ${billNumber}`);
 
 }
 
@@ -457,10 +435,8 @@ function shareCurrentBillOnWhatsapp() {
         grandTotal:   parseFloat(document.getElementById("grandTotal").innerText)
     };
 
-    // Step 1: Download the PDF
     createBillPDF(bill);
 
-    // Step 2: Open WhatsApp after a short delay so the download starts first
     const name    = customerName || "your order";
     const message = `Hi, please find the bill for ${name} attached.`;
 
@@ -485,7 +461,7 @@ function loadBillHistory() {
     if (bills.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="5" class="text-center text-muted py-3">
+                <td colspan="6" class="text-center text-muted py-3">
                     No bills saved yet.
                 </td>
             </tr>`;
@@ -502,9 +478,10 @@ function loadBillHistory() {
             const row = document.createElement("tr");
 
             row.innerHTML = `
+                <td><strong>${bill.billNumber || "—"}</strong></td>
                 <td>${bill.date}</td>
                 <td>${bill.time}</td>
-                <td>${escapeHtml(bill.customerName)}</td>
+                <td>${escapeHtml(bill.customerName || "—")}</td>
                 <td>₹ ${bill.grandTotal.toFixed(2)}</td>
                 <td>
                     <button class="btn btn-primary btn-sm me-1"
@@ -549,9 +526,12 @@ function viewBill(index) {
 
     const bill = getBills()[index];
 
-    document.getElementById("billCustomer").innerText = "Customer : " + bill.customerName;
-    document.getElementById("billDate").innerText     = "Date : "     + bill.date;
-    document.getElementById("billTime").innerText     = "Time : "     + bill.time;
+    document.getElementById("billCustomer").innerText =
+        bill.customerName ? "Customer : " + bill.customerName : "";
+    document.getElementById("billNumber").innerText =
+        "Bill No : " + (bill.billNumber || "—");
+    document.getElementById("billDate").innerText = "Date : " + bill.date;
+    document.getElementById("billTime").innerText = "Time : " + bill.time;
 
     const tbody = document.getElementById("billDetailsTable");
     tbody.innerHTML = "";
@@ -626,10 +606,8 @@ function shareBillOnWhatsapp() {
 
     const bill = getBills()[selectedHistoryBillIndex];
 
-    // Step 1: Download the PDF
     createBillPDF(bill);
 
-    // Step 2: Open WhatsApp after a short delay so the download starts first
     const name    = bill.customerName || "your order";
     const message = `Hi, please find the bill for ${name} attached.`;
 

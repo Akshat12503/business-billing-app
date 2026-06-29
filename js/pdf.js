@@ -13,23 +13,43 @@ function createBillPDF(bill) {
 
     doc.setFontSize(20);
     doc.setFont("helvetica", "bold");
-    doc.text("BILL RECEIPT", centerX, 18, { align: "center" });
+    doc.text("ROUGH ESTIMATE", centerX, 18, { align: "center" });
 
     doc.setLineWidth(0.5);
     doc.line(margin, 22, pageWidth - margin, 22);
 
+    // ── Info Row: Customer (left) | Date + Time (right) ─────
+
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
 
-    doc.text(`Date : ${bill.date}`, margin, 30);
-    doc.text(`Time : ${bill.time}`, margin, 37);
+    const rightX = pageWidth - margin;
+    let   infoY  = 30;
 
-    let tableStartY = 45;
-
-    if (bill.customerName) {
-        doc.text(`Customer : ${bill.customerName}`, margin, 44);
-        tableStartY = 52;
+    // Bill number — small, top left
+    if (bill.billNumber) {
+        doc.setFontSize(9);
+        doc.setTextColor(100);
+        doc.text(`Bill No : ${bill.billNumber}`, margin, infoY);
+        doc.setTextColor(0);
+        doc.setFontSize(11);
+        infoY = 37;
     }
+
+    // Customer name on the left
+    if (bill.customerName) {
+        doc.setFont("helvetica", "bold");
+        doc.text(`Customer : ${bill.customerName}`, margin, infoY);
+        doc.setFont("helvetica", "normal");
+    }
+
+    // Date on the right, same line as customer
+    doc.text(`Date : ${bill.date}`, rightX, infoY, { align: "right" });
+
+    // Time on the right, one line below
+    doc.text(`Time : ${bill.time}`, rightX, infoY + 7, { align: "right" });
+
+    const tableStartY = infoY + 16;
 
     // ── Items Table ──────────────────────────────────────────
 
@@ -86,14 +106,6 @@ function createBillPDF(bill) {
         finalY + 5,
         { align: "right" }
     );
-
-    // ── Footer ───────────────────────────────────────────────
-
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "italic");
-    doc.setTextColor(120);
-    doc.text("Thank you for your purchase!", centerX, finalY + 16, { align: "center" });
-    doc.setTextColor(0);
 
     // ── Save ─────────────────────────────────────────────────
 

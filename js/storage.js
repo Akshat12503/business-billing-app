@@ -1,9 +1,9 @@
 // ===== Storage Keys =====
 
-const CATEGORY_KEY = "billing_categories";
-const PRODUCT_KEY  = "billing_products";
-const BILL_KEY     = "billing_bills";
-const STOCK_KEY    = "billing_stock";
+const CATEGORY_KEY   = "billing_categories";
+const PRODUCT_KEY    = "billing_products";
+const BILL_KEY       = "billing_bills";
+const BILL_COUNTER_KEY = "billing_bill_counter";
 
 
 // ===== Initialize with Sample Data =====
@@ -47,8 +47,8 @@ function initializeStorage() {
         localStorage.setItem(BILL_KEY, JSON.stringify([]));
     }
 
-    if (!localStorage.getItem(STOCK_KEY)) {
-        localStorage.setItem(STOCK_KEY, JSON.stringify({}));
+    if (!localStorage.getItem(BILL_COUNTER_KEY)) {
+        localStorage.setItem(BILL_COUNTER_KEY, "0");
     }
 
 }
@@ -105,50 +105,18 @@ function saveBills(bills) {
 }
 
 
-// ===== Stock =====
-// Stock is stored as { productId: quantity, ... }
+// ===== Bill Number =====
+// Format: A1 → A100, then B1 → B100, etc.
 
-function getStock() {
-    return JSON.parse(localStorage.getItem(STOCK_KEY)) || {};
-}
+function generateBillNumber() {
+    const counter = parseInt(localStorage.getItem(BILL_COUNTER_KEY) || "0") + 1;
+    localStorage.setItem(BILL_COUNTER_KEY, String(counter));
 
-function saveStock(stock) {
-    localStorage.setItem(STOCK_KEY, JSON.stringify(stock));
-}
+    const letterIndex = Math.floor((counter - 1) / 100);
+    const number      = ((counter - 1) % 100) + 1;
+    const letter      = String.fromCharCode(65 + letterIndex); // A, B, C...
 
-// Get stock level for a single product (returns 0 if never set)
-function getStockById(productId) {
-    const stock = getStock();
-    return stock[productId] !== undefined ? stock[productId] : 0;
-}
-
-// Add stock manually (purchase/receive goods)
-function addStock(productId, qty) {
-    const stock = getStock();
-    stock[productId] = parseFloat(((stock[productId] || 0) + qty).toFixed(3));
-    saveStock(stock);
-}
-
-// Reduce stock when a bill item is added
-function reduceStock(productId, qty) {
-    const stock = getStock();
-    const current = stock[productId] || 0;
-    stock[productId] = parseFloat((current - qty).toFixed(3));
-    saveStock(stock);
-}
-
-// Set stock to a specific value (for manual correction)
-function setStock(productId, qty) {
-    const stock = getStock();
-    stock[productId] = parseFloat(qty.toFixed(3));
-    saveStock(stock);
-}
-
-// Remove stock entry when a product is deleted
-function removeStockEntry(productId) {
-    const stock = getStock();
-    delete stock[productId];
-    saveStock(stock);
+    return `${letter}${number}`;
 }
 
 
@@ -165,10 +133,10 @@ function generateProductId() {
 
 function exportData() {
     const backupData = {
-        categories: getCategories(),
-        products:   getProducts(),
-        bills:      getBills(),
-        stock:      getStock()
+        categories:  getCategories(),
+        products:    getProducts(),
+        bills:       getBills(),
+        billCounter: localStorage.getItem(BILL_COUNTER_KEY) || "0"
     };
 
     const blob = new Blob(
@@ -193,10 +161,10 @@ function importData(file) {
         try {
             const data = JSON.parse(event.target.result);
 
-            if (data.categories) saveCategories(data.categories);
-            if (data.products)   saveProducts(data.products);
-            if (data.bills)      saveBills(data.bills);
-            if (data.stock)      saveStock(data.stock);
+            if (data.categories)  saveCategories(data.categories);
+            if (data.products)    saveProducts(data.products);
+            if (data.bills)       saveBills(data.bills);
+            if (data.billCounter) localStorage.setItem(BILL_COUNTER_KEY, data.billCounter);
 
             alert("Data imported successfully.");
             location.reload();
