@@ -338,21 +338,6 @@ function saveProductChanges(productId) {
 
 }
 
-
-// ===== Delete Product =====
-
-function deleteProduct(productId) {
-
-    if (!confirm("Delete this product?")) return;
-
-    const products = getProducts().filter(p => p.id != productId);
-    saveProducts(products);
-    removeStockEntry(productId);
-    loadProductTable();
-
-}
-
-
 // ===== Utility =====
 
 function escapeHtml(str) {
