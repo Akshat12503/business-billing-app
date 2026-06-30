@@ -68,6 +68,10 @@ document.addEventListener("DOMContentLoaded", () => {
         .addEventListener("click", printCurrentBillThermal);
 
     document
+        .getElementById("mainPrintBtn")
+        .addEventListener("click", printCurrentBillThermal);
+
+    document
         .getElementById("whatsappBtn")
         .addEventListener("click", shareCurrentBillOnWhatsapp);
 

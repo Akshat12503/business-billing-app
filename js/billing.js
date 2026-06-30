@@ -660,6 +660,62 @@ function shareBillOnWhatsapp() {
 // the left, date + time on the right, items table, grand total.
 // Works for both A4 and thermal printers since it has no fixed width.
 
+function buildThermalReceiptHTML(bill) {
+
+    let rows = "";
+
+    bill.items.forEach((item, i) => {
+        rows += `
+            <tr>
+                <td class="num">${i + 1}</td>
+                <td class="col-item">${escapeHtml(item.name)}</td>
+                <td class="num">${item.quantity.toFixed(3)} ${item.unit}</td>
+                <td class="right">${item.rate.toFixed(2)}</td>
+                <td class="right">${item.total.toFixed(2)}</td>
+            </tr>`;
+    });
+
+    const billNoLine   = bill.billNumber   ? `<span>Bill No : ${bill.billNumber}</span>` : "";
+    const customerLine = bill.customerName ? `<span>${escapeHtml(bill.customerName)}</span>` : "";
+
+    return `
+        <div class="tr-title">Rough Estimate</div>
+        <hr class="tr-divider">
+
+        <div class="tr-meta-row">
+            <div class="tr-meta-left">
+                ${billNoLine}
+                ${customerLine}
+            </div>
+            <div class="tr-meta-right">
+                <span>${bill.date}</span>
+                <span>${bill.time}</span>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th class="num">S.No</th>
+                    <th class="col-item">Item</th>
+                    <th class="num">Qty/Wt</th>
+                    <th class="right">Price</th>
+                    <th class="right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rows}
+            </tbody>
+        </table>
+
+        <div class="tr-grand-total">
+            <span>Grand Total :</span>
+            <span>Rs ${bill.grandTotal.toFixed(2)}</span>
+        </div>
+    `;
+
+}
+
 function printCurrentBillThermal() {
 
     if (currentBill.length === 0) {
@@ -670,7 +726,7 @@ function printCurrentBillThermal() {
     const now = new Date();
 
     const bill = {
-        billNumber:   null,
+        billNumber:   null, // not assigned until saved
         date:         now.toLocaleDateString("en-GB"),
         time:         now.toLocaleTimeString(),
         customerName: document.getElementById("customerName").value.trim(),
@@ -695,9 +751,9 @@ function printBillFromHistoryThermal(bill) {
 // CustomerName_DD-MM-YYYY as the file name, then restores the original title.
 function printWithFileName(bill) {
 
-    const safeName       = (bill.customerName || "Bill").replace(/\s+/g, "");
-    const formattedDate  = bill.date.replaceAll("/", "-");
-    const originalTitle  = document.title;
+    const safeName      = (bill.customerName || "Bill").replace(/\s+/g, "");
+    const formattedDate = bill.date.replaceAll("/", "-");
+    const originalTitle = document.title;
 
     document.title = `${safeName}_${formattedDate}`;
 
