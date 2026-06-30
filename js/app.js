@@ -8,20 +8,44 @@ document.addEventListener("DOMContentLoaded", () => {
     loadCategories();
     loadProductTable();
     initProductSearch();
+    initSellerTypeSegment();
+
+
+    // ── Drawer (mobile/desktop menu) ───────────────────────
+
+    const drawer        = document.getElementById("drawer");
+    const drawerOverlay  = document.getElementById("drawerOverlay");
+
+    function openDrawer() {
+        drawer.classList.add("open");
+        drawerOverlay.classList.add("open");
+    }
+
+    function closeDrawer() {
+        drawer.classList.remove("open");
+        drawerOverlay.classList.remove("open");
+    }
+
+    document.getElementById("menuToggle").addEventListener("click", openDrawer);
+    document.getElementById("drawerClose").addEventListener("click", closeDrawer);
+    drawerOverlay.addEventListener("click", closeDrawer);
+
+    // Close drawer whenever a drawer link is clicked (so modal isn't hidden behind it)
+    document.querySelectorAll(".drawer-link").forEach(link => {
+        link.addEventListener("click", closeDrawer);
+    });
+
 
     // ── Product Entry ─────────────────────────────────────
 
-    // When category changes, populate the product dropdown
     document
         .getElementById("categorySelect")
         .addEventListener("change", loadProducts);
 
-    // Add item to current bill
     document
         .getElementById("addItemBtn")
         .addEventListener("click", addItemToBill);
 
-    // Also allow pressing Enter in the quantity field to add item
     document
         .getElementById("quantity")
         .addEventListener("keydown", (e) => {
@@ -85,19 +109,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // ── Product Management ────────────────────────────────
 
     document
-        .getElementById("stockBtn")
-        .addEventListener("click", () => {
-            loadStockOverview();
-            new bootstrap.Modal(
-                document.getElementById("stockModal")
-            ).show();
-        });
-
-    document
-        .getElementById("stockSearch")
-        .addEventListener("keyup", filterStockTable);
-
-    document
         .getElementById("manageProductsBtn")
         .addEventListener("click", () => {
             loadCategories();
@@ -133,13 +144,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             addProduct(name, category, unit, localRate, generalRate, retailRate);
 
-            // Clear product form
             document.getElementById("newProductName").value = "";
             document.getElementById("localRate").value      = "";
             document.getElementById("generalRate").value    = "";
             document.getElementById("retailRate").value     = "";
 
-            // Refresh main bill dropdowns in case category was new
             loadProducts();
 
         });
@@ -162,8 +171,30 @@ document.addEventListener("DOMContentLoaded", () => {
         .addEventListener("change", (event) => {
             const file = event.target.files[0];
             if (file) importData(file);
-            // Reset so same file can be re-imported if needed
             event.target.value = "";
         });
 
 });
+
+
+// ===== Seller Type Segmented Control =====
+// Keeps the hidden <select id="sellerType"> in sync so existing billing.js logic
+// (which reads sellerType.value) keeps working unmodified.
+
+function initSellerTypeSegment() {
+
+    const segButtons = document.querySelectorAll("#sellerTypeSegment .seg-btn");
+    const hiddenSelect = document.getElementById("sellerType");
+
+    segButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            segButtons.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            hiddenSelect.value = btn.dataset.value;
+
+            // Trigger change so any other listeners (e.g. live search rates) refresh
+            hiddenSelect.dispatchEvent(new Event("change"));
+        });
+    });
+
+}

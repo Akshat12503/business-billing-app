@@ -1,131 +1,446 @@
-/* ===== BASE ===== */
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+
+:root {
+    --bg:           #F7F8F6;
+    --surface:      #FFFFFF;
+    --border:       #E4E7E2;
+    --border-soft:  #EDEFEC;
+
+    --text-1:       #1C1F1B;
+    --text-2:       #6B716A;
+    --text-3:       #9CA29A;
+
+    --accent:       #1F8A5C;
+    --accent-dark:  #176B47;
+    --accent-soft:  #E7F4EE;
+
+    --danger:       #D64545;
+    --danger-soft:  #FBEBEB;
+
+    --warn:         #B8860B;
+
+    --radius-lg:    16px;
+    --radius-md:    12px;
+    --radius-sm:    8px;
+
+    --shadow-sm:    0 1px 2px rgba(28, 31, 27, 0.04), 0 1px 1px rgba(28,31,27,0.03);
+    --shadow-md:    0 4px 16px rgba(28, 31, 27, 0.06), 0 2px 4px rgba(28,31,27,0.04);
+    --shadow-lg:    0 12px 32px rgba(28, 31, 27, 0.12);
+
+    --font-ui:      'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono:    'Inter', system-ui, -apple-system, sans-serif;
+}
+
+
+/* ============================================================
+   BASE
+   ============================================================ */
+
+* {
+    box-sizing: border-box;
+}
 
 body {
-    background-color: #f0f2f5;
-    font-family: Arial, sans-serif;
+    background-color: var(--bg);
+    font-family: var(--font-ui);
+    color: var(--text-1);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-ui);
+    color: var(--text-1);
+}
+
+.text-muted {
+    color: var(--text-2) !important;
 }
 
 
-/* ===== CARDS ===== */
+/* ============================================================
+   TOP BAR
+   ============================================================ */
 
-.card {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1040;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
 }
 
-.card-header {
-    font-weight: bold;
-    font-size: 15px;
-    background-color: #0d6efd;
+.topbar-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.brand-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: var(--accent);
     color: white;
-    border-radius: 12px 12px 0 0 !important;
-    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 17px;
+    font-family: var(--font-mono);
+}
+
+.brand-text {
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.01em;
+}
+
+.menu-toggle {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.menu-toggle:hover {
+    background: var(--bg);
+    border-color: var(--text-3);
 }
 
 
-/* ===== TABLE ===== */
+/* ============================================================
+   DRAWER
+   ============================================================ */
 
-table {
-    background-color: white;
+.drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(28, 31, 27, 0.35);
+    z-index: 1050;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
 }
 
-th {
-    vertical-align: middle;
-    background-color: #f8f9fa;
-    font-size: 14px;
+.drawer-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
 }
 
-td {
-    vertical-align: middle;
-    font-size: 14px;
+.drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 300px;
+    max-width: 85vw;
+    background: var(--surface);
+    z-index: 1060;
+    transform: translateX(100%);
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+}
+
+.drawer.open {
+    transform: translateX(0);
+}
+
+.drawer-head {
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.drawer-close {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: transparent;
+    color: var(--text-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.drawer-close:hover {
+    background: var(--bg);
+}
+
+.drawer-nav {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.drawer-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 12px;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-sm);
+    font-size: 14.5px;
+    font-weight: 500;
+    color: var(--text-1);
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.drawer-link:hover {
+    background: var(--bg);
+}
+
+.drawer-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.drawer-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 4px;
 }
 
 
-/* ===== GRAND TOTAL ===== */
+/* ============================================================
+   MAIN LAYOUT
+   ============================================================ */
 
-#grandTotal {
-    color: #198754;
-    font-weight: bold;
+.main-wrap {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 20px 20px 60px;
+}
+
+.layout-grid {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.col-left {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.col-right {
+    min-width: 0;
 }
 
 
-/* ===== BUTTONS ===== */
+/* ============================================================
+   PANELS
+   ============================================================ */
 
-button {
-    border-radius: 8px !important;
+.panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.panel-head {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.panel-head h2 {
+    font-size: 14.5px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.panel-head-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.item-count-pill {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-dark);
+    background: var(--accent-soft);
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+.panel-body {
+    padding: 18px 20px;
+}
+
+.panel-body-flush {
+    padding: 0;
+}
+
+.panel-actions {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-soft);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 
-/* ===== INPUTS ===== */
+/* ============================================================
+   FORM FIELDS
+   ============================================================ */
 
+.field {
+    margin-bottom: 16px;
+}
+
+.field.mb-0 {
+    margin-bottom: 0;
+}
+
+.field label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-2);
+    margin-bottom: 6px;
+    letter-spacing: 0.01em;
+}
+
+.optional-tag {
+    font-weight: 400;
+    color: var(--text-3);
+    font-size: 11px;
+    text-transform: lowercase;
+}
+
+.input,
 .form-control,
 .form-select {
-    border-radius: 8px;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    color: var(--text-1);
+    background: var(--surface);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input:focus,
+.form-control:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.visually-hidden-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
 }
 
 
-/* ===== MODAL ===== */
+/* Segmented control for Seller Type */
 
-.modal-header {
-    background-color: #0d6efd;
-    color: white;
+.segmented {
+    display: flex;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+    gap: 3px;
 }
 
-.modal-header .btn-close {
-    filter: invert(1);
+.seg-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 8px 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-2);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
 }
 
-
-/* ===== RESPONSIVE: TABLET / MOBILE ===== */
-
-@media (max-width: 991px) {
-    .col-lg-4 {
-        margin-bottom: 20px;
-    }
-}
-
-@media (max-width: 576px) {
-    .card-body {
-        padding: 0.75rem;
-    }
-
-    table {
-        font-size: 12px;
-    }
-
-    th, td {
-        font-size: 12px;
-        padding: 6px 4px;
-    }
-
-    h3 {
-        font-size: 18px;
-    }
-
-    .btn {
-        font-size: 13px;
-        padding: 6px 10px;
-    }
+.seg-btn.active {
+    background: var(--surface);
+    color: var(--accent-dark);
+    box-shadow: var(--shadow-sm);
 }
 
 
-/* ===== PRODUCT SEARCH DROPDOWN ===== */
+/* ============================================================
+   SEARCH
+   ============================================================ */
+
+.search-input-wrap {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-3);
+    pointer-events: none;
+}
+
+.search-input {
+    padding-left: 36px !important;
+}
 
 .search-dropdown {
-    position:         absolute;
-    top:              100%;
-    left:             0;
-    right:            0;
-    background:       white;
-    border:           1px solid #dee2e6;
-    border-top:       none;
-    border-radius:    0 0 8px 8px;
-    box-shadow:       0 4px 12px rgba(0,0,0,0.1);
-    z-index:          1050;
-    max-height:       220px;
-    overflow-y:       auto;
-    display:          none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md);
+    z-index: 50;
+    max-height: 240px;
+    overflow-y: auto;
+    display: none;
 }
 
 .search-dropdown.open {
@@ -133,14 +448,14 @@ button {
 }
 
 .search-result-item {
-    padding:        10px 14px;
-    cursor:         pointer;
-    border-bottom:  1px solid #f0f0f0;
-    display:        flex;
+    padding: 11px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-soft);
+    display: flex;
     justify-content: space-between;
-    align-items:    center;
-    font-size:      14px;
-    transition:     background 0.15s;
+    align-items: center;
+    font-size: 13.5px;
+    transition: background 0.12s;
 }
 
 .search-result-item:last-child {
@@ -149,34 +464,367 @@ button {
 
 .search-result-item:hover,
 .search-result-item.active {
-    background-color: #e8f0fe;
+    background-color: var(--accent-soft);
 }
 
 .search-result-item .item-name {
-    font-weight: 500;
+    font-weight: 600;
+    color: var(--text-1);
 }
 
 .search-result-item .item-meta {
-    font-size:  12px;
-    color:      #6c757d;
+    font-size: 12px;
+    color: var(--text-2);
+    font-family: var(--font-mono);
 }
 
 .search-no-results {
-    padding:    12px 14px;
-    color:      #6c757d;
-    font-size:  13px;
+    padding: 14px;
+    color: var(--text-2);
+    font-size: 13px;
     text-align: center;
 }
 
 .divider-or {
-    text-align:  center;
-    font-size:   12px;
-    user-select: none;
+    text-align: center;
+    margin: 16px 0;
+    position: relative;
+    color: var(--text-3);
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.divider-or::before,
+.divider-or::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 38%;
+    height: 1px;
+    background: var(--border);
+}
+
+.divider-or::before { left: 0; }
+.divider-or::after  { right: 0; }
+
+.divider-or span {
+    background: var(--surface);
+    padding: 0 10px;
+    position: relative;
 }
 
 
-/* ===== PRINT STYLES ===== */
-/* Hides everything except the bill table when using window.print() */
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+.btn {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: 13.5px;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.15s, border-color 0.15s, transform 0.05s;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.btn-accent {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-accent:hover {
+    background: var(--accent-dark);
+    color: white;
+}
+
+.btn-outline {
+    background: var(--surface);
+    color: var(--text-1);
+    border-color: var(--border);
+}
+
+.btn-outline:hover {
+    border-color: var(--text-3);
+    background: var(--bg);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-2);
+}
+
+.btn-ghost:hover {
+    background: var(--bg);
+}
+
+.btn-ghost-danger {
+    background: transparent;
+    color: var(--danger);
+}
+
+.btn-ghost-danger:hover {
+    background: var(--danger-soft);
+}
+
+/* Small action buttons used in tables (Save/Delete/etc via Bootstrap classes) */
+.btn-success {
+    background: var(--accent) !important;
+    border-color: var(--accent) !important;
+}
+.btn-success:hover {
+    background: var(--accent-dark) !important;
+    border-color: var(--accent-dark) !important;
+}
+.btn-danger {
+    background: var(--danger) !important;
+    border-color: var(--danger) !important;
+}
+.btn-primary {
+    background: var(--text-1) !important;
+    border-color: var(--text-1) !important;
+}
+
+
+/* ============================================================
+   BILL TABLE
+   ============================================================ */
+
+.bill-table-wrap {
+    position: relative;
+}
+
+.bill-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+}
+
+.bill-table thead th {
+    background: var(--bg);
+    color: var(--text-2);
+    font-weight: 600;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 11px 12px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.bill-table thead th.text-start {
+    text-align: left;
+}
+
+.bill-table .col-no {
+    width: 36px;
+    color: var(--text-3);
+}
+
+.bill-table .col-action {
+    width: 44px;
+}
+
+.bill-table tbody td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-soft);
+    vertical-align: middle;
+}
+
+.bill-table tbody td.text-start {
+    text-align: left;
+    font-weight: 500;
+}
+
+.bill-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.bill-table tbody tr:hover {
+    background: var(--bg);
+}
+
+/* Numbers in mono for tabular alignment */
+.bill-table td:nth-child(3),
+.bill-table td:nth-child(4),
+.bill-table td:nth-child(5) {
+    font-family: var(--font-mono);
+    font-size: 13px;
+}
+
+.empty-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 56px 20px;
+    text-align: center;
+}
+
+.empty-state.show {
+    display: flex;
+}
+
+.empty-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+    opacity: 0.5;
+}
+
+.empty-state p {
+    font-weight: 600;
+    color: var(--text-1);
+    margin: 0 0 4px;
+    font-size: 14px;
+}
+
+.empty-state span {
+    color: var(--text-3);
+    font-size: 12.5px;
+}
+
+.grand-total-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    background: var(--accent-soft);
+    border-top: 1px solid var(--border-soft);
+}
+
+.grand-total-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.grand-total-value {
+    font-family: var(--font-mono);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent-dark);
+}
+
+
+/* ============================================================
+   MISC TABLES (Modals: products / categories / history)
+   ============================================================ */
+
+table {
+    background-color: var(--surface);
+}
+
+th {
+    vertical-align: middle;
+    background-color: var(--bg);
+    font-size: 13px;
+    color: var(--text-2);
+}
+
+td {
+    vertical-align: middle;
+    font-size: 13.5px;
+}
+
+.section-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-2);
+    margin-bottom: 10px;
+}
+
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+
+.modal-content {
+    border-radius: var(--radius-md);
+    border: none;
+}
+
+.modal-header {
+    background-color: var(--text-1);
+    color: white;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.modal-header .btn-close {
+    filter: invert(1);
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 991px) {
+    .layout-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .topbar-inner {
+        padding: 12px 16px;
+    }
+
+    .main-wrap {
+        padding: 16px 14px 50px;
+    }
+
+    .panel-body {
+        padding: 14px 16px;
+    }
+
+    .panel-actions {
+        padding: 14px 16px;
+    }
+
+    .grand-total-value {
+        font-size: 20px;
+    }
+
+    table {
+        font-size: 12px;
+    }
+
+    th, td {
+        font-size: 12px;
+        padding: 8px 6px;
+    }
+
+    .btn {
+        font-size: 13px;
+        padding: 9px 12px;
+    }
+}
+
+
+/* ============================================================
+   PRINT
+   ============================================================ */
 
 @media print {
 
@@ -184,55 +832,47 @@ button {
         visibility: hidden;
     }
 
-    /* Show only the bill card area */
-    .col-lg-8,
-    .col-lg-8 * {
+    .panel-bill,
+    .panel-bill * {
         visibility: visible;
     }
 
-    .col-lg-8 {
+    .panel-bill {
         position: absolute;
         left: 0;
         top: 0;
         width: 100%;
-    }
-
-    /* Hide action buttons when printing */
-    .d-flex.flex-wrap.gap-2 {
-        display: none !important;
-    }
-
-    /* Hide the Remove column */
-    th:last-child,
-    td:last-child {
-        display: none;
-    }
-
-    .card {
         box-shadow: none;
         border: none;
     }
 
-    .card-header {
-        background-color: white !important;
+    .panel-actions {
+        display: none !important;
+    }
+
+    .bill-table .col-action {
+        display: none;
+    }
+
+    .bill-table tr > *:last-child {
+        display: none;
+    }
+
+    .grand-total-row {
+        background: white !important;
+    }
+
+    .grand-total-label,
+    .grand-total-value {
         color: black !important;
-        font-size: 18px;
-        text-align: center;
-        border-bottom: 2px solid black;
     }
 
     table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 13px;
     }
 
     th, td {
         border: 1px solid black !important;
-        padding: 5px 8px;
-    }
-
-    #grandTotal {
-        color: black;
     }
 }

@@ -53,6 +53,7 @@ function initProductSearch() {
 
     });
 
+    // Keyboard navigation
     input.addEventListener("keydown", (e) => {
 
         const items = results.querySelectorAll(".search-result-item");
@@ -84,6 +85,7 @@ function initProductSearch() {
 
     });
 
+    // Close dropdown when clicking outside
     document.addEventListener("click", (e) => {
         if (!input.contains(e.target) && !results.contains(e.target)) {
             closeSearch();
@@ -94,20 +96,31 @@ function initProductSearch() {
 
 function selectSearchProduct(productId) {
 
-    const product  = getProductById(productId);
-    const searchBox = document.getElementById("productSearch");
-    const results   = document.getElementById("searchResults");
+    const product    = getProductById(productId);
+    const sellerType = document.getElementById("sellerType").value;
 
     if (!product) return;
 
+    const rate = sellerType === "local"   ? product.localRate
+               : sellerType === "general" ? product.generalRate
+               : product.retailRate;
+
+    // Show a small prompt for quantity
+    const qtyInput = document.getElementById("searchQtyInput");
+    const searchBox = document.getElementById("productSearch");
+    const results   = document.getElementById("searchResults");
+
+    // Fill the name in search bar as confirmation, close dropdown
     searchBox.value = product.name;
     results.innerHTML = "";
     results.classList.remove("open");
 
+    // Highlight and focus quantity field
     const qty = document.getElementById("quantity");
     qty.value = "";
     qty.focus();
 
+    // Store selected product id so Add Item button / Enter can use it
     searchBox.dataset.selectedId = productId;
 
 }
@@ -118,8 +131,7 @@ function closeSearch() {
     results.classList.remove("open");
 }
 
-
-// ===== Add Item =====
+// ===== Add Item (supports both search and dropdown) =====
 
 function addItemToBill() {
 
@@ -128,6 +140,7 @@ function addItemToBill() {
     const searchId    = searchInput.dataset.selectedId;
     const dropdownId  = document.getElementById("productSelect").value;
 
+    // Search bar takes priority if a product was selected from it
     const productId = searchId || dropdownId;
     const quantity  = parseFloat(document.getElementById("quantity").value);
 
@@ -171,6 +184,7 @@ function addItemToBill() {
     document.getElementById("quantity").value = "";
     document.getElementById("quantity").focus();
 
+    // Clear search bar selection
     searchInput.value = "";
     delete searchInput.dataset.selectedId;
     closeSearch();
@@ -232,6 +246,18 @@ function renderBill() {
 
     document.getElementById("grandTotal").innerText = grandTotal.toFixed(2);
 
+    // Toggle empty state and update item count pill
+    const emptyState = document.getElementById("billEmptyState");
+    const countPill   = document.getElementById("itemCountPill");
+
+    if (emptyState) {
+        emptyState.classList.toggle("show", currentBill.length === 0);
+    }
+
+    if (countPill) {
+        countPill.innerText = `${currentBill.length} item${currentBill.length === 1 ? "" : "s"}`;
+    }
+
 }
 
 
@@ -239,9 +265,10 @@ function renderBill() {
 
 function startEditRate(index) {
 
-    const item     = currentBill[index];
+    const item    = currentBill[index];
     const rateCell = document.getElementById(`rate-cell-${index}`);
 
+    // Replace cell content with an input + confirm button
     rateCell.innerHTML = `
         <div class="d-flex align-items-center justify-content-center gap-1">
             <input
@@ -268,16 +295,19 @@ function startEditRate(index) {
         </div>
     `;
 
+    // Focus and select the input
     const input = document.getElementById(`rate-input-${index}`);
     input.focus();
     input.select();
 
+    // Allow pressing Enter to confirm
     input.addEventListener("keydown", (e) => {
         if (e.key === "Enter")  confirmEditRate(index);
         if (e.key === "Escape") renderBill();
     });
 
 }
+
 
 function confirmEditRate(index) {
 
@@ -366,6 +396,9 @@ function confirmEditQty(index) {
 // ===== Remove Item =====
 
 function removeItem(index) {
+    const item = currentBill[index];
+    // Restore stock when item is removed from bill
+    addStock(item.productId, item.quantity);
     currentBill.splice(index, 1);
     renderBill();
 }
@@ -391,25 +424,23 @@ function saveBill() {
         return;
     }
 
-    const bills      = getBills();
-    const now        = new Date();
-    const billNumber = generateBillNumber();
+    const bills = getBills();
+    const now   = new Date();
 
     const bill = {
-        billNumber,
-        date:        now.toLocaleDateString("en-GB"),
-        time:        now.toLocaleTimeString(),
+        date:         now.toLocaleDateString("en-GB"),
+        time:         now.toLocaleTimeString(),
         customerName,
-        items:       currentBill,
-        grandTotal:  parseFloat(
-                         document.getElementById("grandTotal").innerText
-                     )
+        items:        currentBill,
+        grandTotal:   parseFloat(
+                          document.getElementById("grandTotal").innerText
+                      )
     };
 
     bills.push(bill);
     saveBills(bills);
 
-    alert(`Bill saved successfully. Bill No: ${billNumber}`);
+    alert("Bill saved successfully.");
 
 }
 
@@ -435,8 +466,10 @@ function shareCurrentBillOnWhatsapp() {
         grandTotal:   parseFloat(document.getElementById("grandTotal").innerText)
     };
 
+    // Step 1: Download the PDF
     createBillPDF(bill);
 
+    // Step 2: Open WhatsApp after a short delay so the download starts first
     const name    = customerName || "your order";
     const message = `Hi, please find the bill for ${name} attached.`;
 
@@ -563,20 +596,6 @@ function viewBill(index) {
 }
 
 
-// ===== Delete Bill (from history list) =====
-
-function deleteBill(index) {
-
-    if (!confirm("Delete this bill?")) return;
-
-    const bills = getBills();
-    bills.splice(index, 1);
-    saveBills(bills);
-    loadBillHistory();
-
-}
-
-
 // ===== Delete Bill (from details modal) =====
 
 function deleteBillFromModal() {
@@ -606,8 +625,10 @@ function shareBillOnWhatsapp() {
 
     const bill = getBills()[selectedHistoryBillIndex];
 
+    // Step 1: Download the PDF
     createBillPDF(bill);
 
+    // Step 2: Open WhatsApp after a short delay so the download starts first
     const name    = bill.customerName || "your order";
     const message = `Hi, please find the bill for ${name} attached.`;
 
