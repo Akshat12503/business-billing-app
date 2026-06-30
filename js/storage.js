@@ -1,8 +1,8 @@
 // ===== Storage Keys =====
 
-const CATEGORY_KEY   = "billing_categories";
-const PRODUCT_KEY    = "billing_products";
-const BILL_KEY       = "billing_bills";
+const CATEGORY_KEY     = "billing_categories";
+const PRODUCT_KEY      = "billing_products";
+const BILL_KEY         = "billing_bills";
 const BILL_COUNTER_KEY = "billing_bill_counter";
 
 
@@ -106,15 +106,15 @@ function saveBills(bills) {
 
 
 // ===== Bill Number =====
-// Format: A1 → A100, then B1 → B100, etc.
+// Format: A1 -> A100, then B1 -> B100, then C1 -> C100, etc.
 
 function generateBillNumber() {
     const counter = parseInt(localStorage.getItem(BILL_COUNTER_KEY) || "0") + 1;
     localStorage.setItem(BILL_COUNTER_KEY, String(counter));
 
     const letterIndex = Math.floor((counter - 1) / 100);
-    const number      = ((counter - 1) % 100) + 1;
-    const letter      = String.fromCharCode(65 + letterIndex); // A, B, C...
+    const number       = ((counter - 1) % 100) + 1;
+    const letter       = String.fromCharCode(65 + letterIndex); // A, B, C...
 
     return `${letter}${number}`;
 }

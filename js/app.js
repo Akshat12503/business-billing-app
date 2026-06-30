@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document
         .getElementById("printBtn")
-        .addEventListener("click", () => window.print());
+        .addEventListener("click", printCurrentBillThermal);
 
     document
         .getElementById("whatsappBtn")
@@ -100,6 +100,14 @@ document.addEventListener("DOMContentLoaded", () => {
     document
         .getElementById("historyPdfBtn")
         .addEventListener("click", generatePDFFromHistory);
+
+    document
+        .getElementById("historyPrintBtn")
+        .addEventListener("click", () => {
+            if (selectedHistoryBillIndex === null) return;
+            const bill = getBills()[selectedHistoryBillIndex];
+            printBillFromHistoryThermal(bill);
+        });
 
     document
         .getElementById("historyWhatsappBtn")

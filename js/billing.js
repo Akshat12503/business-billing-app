@@ -396,9 +396,6 @@ function confirmEditQty(index) {
 // ===== Remove Item =====
 
 function removeItem(index) {
-    const item = currentBill[index];
-    // Restore stock when item is removed from bill
-    addStock(item.productId, item.quantity);
     currentBill.splice(index, 1);
     renderBill();
 }
@@ -424,10 +421,12 @@ function saveBill() {
         return;
     }
 
-    const bills = getBills();
-    const now   = new Date();
+    const bills      = getBills();
+    const now        = new Date();
+    const billNumber = generateBillNumber();
 
     const bill = {
+        billNumber,
         date:         now.toLocaleDateString("en-GB"),
         time:         now.toLocaleTimeString(),
         customerName,
@@ -440,7 +439,7 @@ function saveBill() {
     bills.push(bill);
     saveBills(bills);
 
-    alert("Bill saved successfully.");
+    alert(`Bill saved successfully. Bill No: ${billNumber}`);
 
 }
 
@@ -596,6 +595,20 @@ function viewBill(index) {
 }
 
 
+// ===== Delete Bill (from history list) =====
+
+function deleteBill(index) {
+
+    if (!confirm("Delete this bill?")) return;
+
+    const bills = getBills();
+    bills.splice(index, 1);
+    saveBills(bills);
+    loadBillHistory();
+
+}
+
+
 // ===== Delete Bill (from details modal) =====
 
 function deleteBillFromModal() {
@@ -638,5 +651,60 @@ function shareBillOnWhatsapp() {
             "_blank"
         );
     }, 800);
+
+}
+
+
+// ===== Thermal Receipt Print (Rough Estimate layout) =====
+// Builds a minimal receipt — Rough Estimate heading, bill no + customer on
+// the left, date + time on the right, items table, grand total.
+// Works for both A4 and thermal printers since it has no fixed width.
+
+function printCurrentBillThermal() {
+
+    if (currentBill.length === 0) {
+        alert("Bill is empty.");
+        return;
+    }
+
+    const now = new Date();
+
+    const bill = {
+        billNumber:   null,
+        date:         now.toLocaleDateString("en-GB"),
+        time:         now.toLocaleTimeString(),
+        customerName: document.getElementById("customerName").value.trim(),
+        items:        currentBill,
+        grandTotal:   parseFloat(document.getElementById("grandTotal").innerText)
+    };
+
+    document.getElementById("thermalReceipt").innerHTML = buildThermalReceiptHTML(bill);
+
+    printWithFileName(bill);
+
+}
+
+function printBillFromHistoryThermal(bill) {
+
+    document.getElementById("thermalReceipt").innerHTML = buildThermalReceiptHTML(bill);
+    printWithFileName(bill);
+
+}
+
+// Temporarily renames the document title so "Save as PDF" suggests
+// CustomerName_DD-MM-YYYY as the file name, then restores the original title.
+function printWithFileName(bill) {
+
+    const safeName       = (bill.customerName || "Bill").replace(/\s+/g, "");
+    const formattedDate  = bill.date.replaceAll("/", "-");
+    const originalTitle  = document.title;
+
+    document.title = `${safeName}_${formattedDate}`;
+
+    window.print();
+
+    setTimeout(() => {
+        document.title = originalTitle;
+    }, 500);
 
 }
