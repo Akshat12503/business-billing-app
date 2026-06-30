@@ -154,6 +154,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
+            const allowsNegative = category === "Difference";
+
+            if (!allowsNegative && (localRate < 0 || generalRate < 0 || retailRate < 0)) {
+                alert("Negative rates are only allowed for the 'Difference' category.");
+                return;
+            }
+
             addProduct(name, category, unit, localRate, generalRate, retailRate);
 
             document.getElementById("newProductName").value = "";

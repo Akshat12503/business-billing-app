@@ -329,6 +329,13 @@ function saveProductChanges(productId) {
         return;
     }
 
+    const allowsNegative = category === "Difference";
+
+    if (!allowsNegative && (localRate < 0 || generalRate < 0 || retailRate < 0)) {
+        alert("Negative rates are only allowed for the 'Difference' category.");
+        return;
+    }
+
     updateProduct(productId, name, category, unit, localRate, generalRate, retailRate);
 
     loadProductTable();
