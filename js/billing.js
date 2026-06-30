@@ -385,7 +385,11 @@ function confirmEditRate(index) {
     const input   = document.getElementById(`rate-input-${index}`);
     const newRate = parseFloat(input.value);
 
-    if (isNaN(newRate) || newRate < 0) {
+    const item            = currentBill[index];
+    const product         = getProductById(item.productId);
+    const allowsNegative  = product && product.category === "Difference";
+
+    if (isNaN(newRate) || (newRate < 0 && !allowsNegative)) {
         alert("Enter a valid rate.");
         return;
     }
