@@ -216,8 +216,9 @@ function loadProductTable() {
 
             <td>
                 <select class="form-select form-select-sm" id="unit-${product.id}">
-                    <option value="kg"    ${product.unit === "kg"    ? "selected" : ""}>kg</option>
-                    <option value="piece" ${product.unit === "piece" ? "selected" : ""}>piece</option>
+                    <option value="kg"     ${product.unit === "kg"     ? "selected" : ""}>kg</option>
+                    <option value="piece"  ${product.unit === "piece"  ? "selected" : ""}>piece</option>
+                    <option value="packet" ${product.unit === "packet" ? "selected" : ""}>packet</option>
                 </select>
             </td>
 

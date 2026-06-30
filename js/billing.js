@@ -209,7 +209,18 @@ function renderBill() {
 
         row.innerHTML = `
             <td>${index + 1}</td>
-            <td class="text-start">${escapeHtml(item.name)}</td>
+            <td id="name-cell-${index}" class="text-start">
+                <div class="d-flex align-items-center justify-content-start gap-1">
+                    <span id="name-display-${index}">${escapeHtml(item.name)}</span>
+                    <button
+                        class="btn btn-sm btn-outline-secondary p-0 px-1"
+                        style="line-height:1.2; font-size:12px;"
+                        title="Edit name"
+                        onclick="startEditName(${index})">
+                        ✏️
+                    </button>
+                </div>
+            </td>
             <td id="qty-cell-${index}">
                 <div class="d-flex align-items-center justify-content-center gap-1">
                     <span>${item.quantity.toFixed(3)} ${item.unit}</span>
@@ -257,6 +268,66 @@ function renderBill() {
     if (countPill) {
         countPill.innerText = `${currentBill.length} item${currentBill.length === 1 ? "" : "s"}`;
     }
+
+}
+
+// ===== Edit Name Inline =====
+
+function startEditName(index) {
+
+    const item     = currentBill[index];
+    const nameCell = document.getElementById(`name-cell-${index}`);
+
+    nameCell.innerHTML = `
+        <div class="d-flex align-items-center justify-content-start gap-1">
+            <input
+                type="text"
+                id="name-input-${index}"
+                class="form-control form-control-sm"
+                style="width: 150px;"
+                value="${escapeHtml(item.name)}">
+            <button
+                class="btn btn-sm btn-success p-0 px-1"
+                style="line-height:1.4; font-size:14px;"
+                title="Confirm"
+                onclick="confirmEditName(${index})">
+                ✓
+            </button>
+            <button
+                class="btn btn-sm btn-secondary p-0 px-1"
+                style="line-height:1.4; font-size:14px;"
+                title="Cancel"
+                onclick="renderBill()">
+                ✕
+            </button>
+        </div>
+    `;
+
+    const input = document.getElementById(`name-input-${index}`);
+    input.focus();
+    input.select();
+
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter")  confirmEditName(index);
+        if (e.key === "Escape") renderBill();
+    });
+
+}
+
+
+function confirmEditName(index) {
+
+    const input   = document.getElementById(`name-input-${index}`);
+    const newName = input.value.trim();
+
+    if (!newName) {
+        alert("Item name cannot be empty.");
+        return;
+    }
+
+    currentBill[index].name = newName;
+
+    renderBill();
 
 }
 
