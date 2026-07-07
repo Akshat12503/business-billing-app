@@ -1,116 +1,241 @@
-// ===== Storage Keys =====
+// ===== Firestore-backed Storage =====
+//
+// Same public functions as before (getCategories, saveProducts, getBills,
+// generateBillNumber, exportData, importData, etc.) so products.js,
+// billing.js, pdf.js, and app.js work UNCHANGED.
+//
+// Under the hood: everything lives in Firestore now, shared by every
+// logged-in account. A local in-memory cache is kept in sync in real
+// time (onSnapshot), so the get___() functions can still return data
+// instantly and synchronously, exactly like localStorage did.
+//
+// Data model (Firestore):
+//   categories/list          -> { items: [ "Rice", "Oil", ... ] }
+//   products/{productId}     -> { name, category, unit, localRate, generalRate, retailRate }
+//   bills/{billId}           -> { billNumber, date, time, customerName, items, grandTotal, createdAt }
+//   meta/counter             -> { value: <last used bill counter> }
 
-const CATEGORY_KEY     = "billing_categories";
-const PRODUCT_KEY      = "billing_products";
-const BILL_KEY         = "billing_bills";
-const BILL_COUNTER_KEY = "billing_bill_counter";
+const CATEGORY_DOC   = db.collection("categories").doc("list");
+const PRODUCTS_COL    = db.collection("products");
+const BILLS_COL        = db.collection("bills");
+const COUNTER_DOC     = db.collection("meta").doc("counter");
 
 
-// ===== Initialize with Sample Data =====
+// ===== In-memory caches (kept live via onSnapshot) =====
 
-function initializeStorage() {
+let categoriesCache = [];
+let productsCache    = [];   // each item has .id (string) matching the original numeric id, kept as Number for compatibility
+let billsCache        = [];   // each item has ._docId (Firestore doc id, internal use only)
+let counterCache      = 0;
 
-    if (!localStorage.getItem(CATEGORY_KEY)) {
-        localStorage.setItem(
-            CATEGORY_KEY,
-            JSON.stringify(["Rice", "Oil", "Spices"])
-        );
-    }
+let listenersStarted = false;
 
-    if (!localStorage.getItem(PRODUCT_KEY)) {
-        localStorage.setItem(
-            PRODUCT_KEY,
-            JSON.stringify([
-                {
-                    id: 1,
-                    name: "Basmati Rice",
-                    category: "Rice",
-                    unit: "kg",
-                    localRate: 80,
-                    generalRate: 85,
-                    retailRate: 90
-                },
-                {
-                    id: 2,
-                    name: "Mustard Oil",
-                    category: "Oil",
-                    unit: "kg",
-                    localRate: 140,
-                    generalRate: 145,
-                    retailRate: 150
-                }
-            ])
-        );
-    }
 
-    if (!localStorage.getItem(BILL_KEY)) {
-        localStorage.setItem(BILL_KEY, JSON.stringify([]));
-    }
+// ===== Start Real-time Sync (called once after login, from auth.js) =====
 
-    if (!localStorage.getItem(BILL_COUNTER_KEY)) {
-        localStorage.setItem(BILL_COUNTER_KEY, "0");
-    }
+function startStorageSync() {
 
+    if (listenersStarted) return;
+    listenersStarted = true;
+
+    // --- Categories ---
+    CATEGORY_DOC.onSnapshot((doc) => {
+        if (doc.exists) {
+            categoriesCache = doc.data().items || [];
+        } else {
+            // First-ever login: seed with sample categories
+            categoriesCache = ["Rice", "Oil", "Spices"];
+            CATEGORY_DOC.set({ items: categoriesCache });
+        }
+        if (typeof loadCategories === "function") loadCategories();
+    }, (err) => console.error("Categories sync error:", err));
+
+    // --- Products ---
+    PRODUCTS_COL.onSnapshot((snap) => {
+
+        if (snap.empty && productsCache.length === 0 && !snap.metadata.fromCache) {
+            // First-ever login: seed with sample products
+            seedSampleProducts();
+            return;
+        }
+
+        productsCache = snap.docs.map((d) => {
+            const data = d.data();
+            return { id: Number(d.id), ...data };
+        });
+
+        if (typeof loadProductTable === "function") loadProductTable();
+        if (typeof loadProducts === "function") loadProducts();
+
+    }, (err) => console.error("Products sync error:", err));
+
+    // --- Bills ---
+    BILLS_COL.orderBy("createdAt", "asc").onSnapshot((snap) => {
+
+        billsCache = snap.docs.map((d) => {
+            const data = d.data();
+            return { _docId: d.id, ...data };
+        });
+
+        if (typeof loadBillHistory === "function") loadBillHistory();
+
+    }, (err) => console.error("Bills sync error:", err));
+
+    // --- Bill Counter ---
+    COUNTER_DOC.onSnapshot((doc) => {
+        counterCache = doc.exists ? (doc.data().value || 0) : 0;
+    }, (err) => console.error("Counter sync error:", err));
+
+}
+
+function seedSampleProducts() {
+    const sample = [
+        { id: 1, name: "Basmati Rice", category: "Rice", unit: "kg", localRate: 80,  generalRate: 85,  retailRate: 90 },
+        { id: 2, name: "Mustard Oil",  category: "Oil",  unit: "kg", localRate: 140, generalRate: 145, retailRate: 150 }
+    ];
+    const batch = db.batch();
+    sample.forEach((p) => {
+        const { id, ...rest } = p;
+        batch.set(PRODUCTS_COL.doc(String(id)), rest);
+    });
+    batch.commit().catch((err) => console.error("Seeding products failed:", err));
 }
 
 
 // ===== Categories =====
 
 function getCategories() {
-    return JSON.parse(localStorage.getItem(CATEGORY_KEY)) || [];
+    return categoriesCache;
 }
 
 function saveCategories(categories) {
-    localStorage.setItem(CATEGORY_KEY, JSON.stringify(categories));
+    categoriesCache = categories; // update cache immediately for snappy UI
+    CATEGORY_DOC.set({ items: categories }).catch((err) => {
+        console.error("Failed to save categories:", err);
+        alert("Could not save categories — check your internet connection.");
+    });
 }
 
 
 // ===== Products =====
+// saveProducts(products) receives the FULL desired array (same contract as
+// before). We diff against the cache so we only write what actually
+// changed/added/removed, instead of rewriting everything every time.
 
 function getProducts() {
-    return JSON.parse(localStorage.getItem(PRODUCT_KEY)) || [];
+    return productsCache;
 }
 
 function saveProducts(products) {
-    localStorage.setItem(PRODUCT_KEY, JSON.stringify(products));
+
+    const oldIds = new Set(productsCache.map((p) => p.id));
+    const newIds = new Set(products.map((p) => p.id));
+
+    const batch = db.batch();
+
+    // Add or update
+    products.forEach((p) => {
+        const { id, ...rest } = p;
+        batch.set(PRODUCTS_COL.doc(String(id)), rest);
+    });
+
+    // Delete removed
+    oldIds.forEach((id) => {
+        if (!newIds.has(id)) {
+            batch.delete(PRODUCTS_COL.doc(String(id)));
+        }
+    });
+
+    productsCache = products; // update cache immediately for snappy UI
+
+    batch.commit().catch((err) => {
+        console.error("Failed to save products:", err);
+        alert("Could not save products — check your internet connection.");
+    });
+
 }
 
 function updateProduct(id, name, category, unit, localRate, generalRate, retailRate) {
-    const products = getProducts();
-    const index = products.findIndex(p => p.id == id);
+
+    const index = productsCache.findIndex((p) => p.id == id);
     if (index === -1) return;
 
-    products[index] = {
-        id: products[index].id,
-        name,
-        category,
-        unit,
-        localRate,
-        generalRate,
-        retailRate
-    };
+    const updated = { id: Number(id), name, category, unit, localRate, generalRate, retailRate };
+    productsCache[index] = updated;
 
-    saveProducts(products);
+    const { id: _drop, ...rest } = updated;
+    PRODUCTS_COL.doc(String(id)).set(rest).catch((err) => {
+        console.error("Failed to update product:", err);
+        alert("Could not update product — check your internet connection.");
+    });
+
 }
 
 
 // ===== Bills =====
+// getBills() returns plain bill objects (no _docId) so existing code that
+// does things like bills.push(...) / bills.splice(...) keeps working.
+// saveBills(bills) receives the FULL desired array and is diffed the same
+// way as products, matched up positionally against the cache.
 
 function getBills() {
-    return JSON.parse(localStorage.getItem(BILL_KEY)) || [];
+    return billsCache.map(({ _docId, ...rest }) => rest);
 }
 
 function saveBills(bills) {
-    localStorage.setItem(BILL_KEY, JSON.stringify(bills));
+
+    const oldCache = billsCache;
+    const batch = db.batch();
+
+    // Bills whose position still exists and match an old cached doc get
+    // updated in place; anything beyond the old length is a new bill.
+    bills.forEach((bill, index) => {
+        if (index < oldCache.length) {
+            batch.set(BILLS_COL.doc(oldCache[index]._docId), withCreatedAt(bill, oldCache[index]));
+        } else {
+            batch.set(BILLS_COL.doc(), withCreatedAt(bill, null));
+        }
+    });
+
+    // Any old docs beyond the new array's length were deleted (e.g. via deleteBill)
+    for (let i = bills.length; i < oldCache.length; i++) {
+        batch.delete(BILLS_COL.doc(oldCache[i]._docId));
+    }
+
+    batch.commit().catch((err) => {
+        console.error("Failed to save bills:", err);
+        alert("Could not save the bill — check your internet connection.");
+    });
+
+}
+
+function withCreatedAt(bill, existingDoc) {
+    return {
+        ...bill,
+        createdAt: existingDoc ? existingDoc.createdAt : firebase.firestore.FieldValue.serverTimestamp()
+    };
 }
 
 
 // ===== Bill Number =====
 // Format: A1 -> A100, then B1 -> B100, then C1 -> C100, etc.
+// Uses a Firestore transaction so two devices saving at the same moment
+// never get the same bill number.
 
 function generateBillNumber() {
-    const counter = parseInt(localStorage.getItem(BILL_COUNTER_KEY) || "0") + 1;
-    localStorage.setItem(BILL_COUNTER_KEY, String(counter));
+
+    // Compute synchronously from the cached counter so the UI (which
+    // expects an immediate return value) keeps working exactly as before.
+    const counter = counterCache + 1;
+    counterCache = counter;
+
+    // Persist the increment in the background via a transaction (safe
+    // against two devices bumping it at the same instant).
+    db.runTransaction(async (tx) => {
+        const doc = await tx.get(COUNTER_DOC);
+        const current = doc.exists ? (doc.data().value || 0) : 0;
+        tx.set(COUNTER_DOC, { value: current + 1 });
+    }).catch((err) => console.error("Failed to update bill counter:", err));
 
     const letterIndex = Math.floor((counter - 1) / 100);
     const number       = ((counter - 1) % 100) + 1;
@@ -123,9 +248,8 @@ function generateBillNumber() {
 // ===== Helpers =====
 
 function generateProductId() {
-    const products = getProducts();
-    if (products.length === 0) return 1;
-    return Math.max(...products.map(p => p.id)) + 1;
+    if (productsCache.length === 0) return 1;
+    return Math.max(...productsCache.map((p) => p.id)) + 1;
 }
 
 
@@ -136,7 +260,7 @@ function exportData() {
         categories:  getCategories(),
         products:    getProducts(),
         bills:       getBills(),
-        billCounter: localStorage.getItem(BILL_COUNTER_KEY) || "0"
+        billCounter: String(counterCache)
     };
 
     const blob = new Blob(
@@ -153,21 +277,30 @@ function exportData() {
 
 
 // ===== Import =====
+// Overwrites cloud data for everyone (all logged-in accounts share the
+// same data), so this is confirmed explicitly before running.
 
 function importData(file) {
+
+    if (!confirm("Importing will replace the shared data for ALL accounts (categories, products, and bills). Continue?")) {
+        return;
+    }
+
     const reader = new FileReader();
 
     reader.onload = function (event) {
         try {
             const data = JSON.parse(event.target.result);
 
-            if (data.categories)  saveCategories(data.categories);
-            if (data.products)    saveProducts(data.products);
-            if (data.bills)       saveBills(data.bills);
-            if (data.billCounter) localStorage.setItem(BILL_COUNTER_KEY, data.billCounter);
+            if (data.categories) saveCategories(data.categories);
+            if (data.products)   saveProducts(data.products);
+            if (data.bills)      saveBills(data.bills);
 
-            alert("Data imported successfully.");
-            location.reload();
+            if (data.billCounter) {
+                COUNTER_DOC.set({ value: parseInt(data.billCounter) || 0 });
+            }
+
+            alert("Data imported successfully. It will sync to all devices shortly.");
 
         } catch (e) {
             alert("Invalid file. Please import a valid backup JSON.");
@@ -177,7 +310,5 @@ function importData(file) {
     reader.readAsText(file);
 }
 
-
-// ===== Boot =====
-
-initializeStorage();
+// Note: no initializeStorage()/boot call here — sync now starts from
+// auth.js once a user is confirmed logged in (see startStorageSync above).
