@@ -65,6 +65,30 @@
             margin-bottom: 8px;
             text-align: center;
         }
+
+        /* ===== Topbar user avatar ===== */
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .user-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #4c8bf5;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: none; /* shown via JS once we know the email */
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            user-select: none;
+        }
+        .user-avatar.show {
+            display: flex;
+        }
     </style>
 </head>
 
@@ -97,9 +121,12 @@
             <span class="brand-mark">₹</span>
             <span class="brand-text">Billing</span>
         </div>
-        <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
+        <div class="topbar-actions">
+            <div class="user-avatar" id="userAvatar" title=""></div>
+            <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+        </div>
     </div>
 </header>
 

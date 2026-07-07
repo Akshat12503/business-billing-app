@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const loginError    = document.getElementById("loginError");
     const loginBtn      = document.getElementById("loginSubmitBtn");
     const logoutBtn     = document.getElementById("logoutBtn");
+    const userAvatar    = document.getElementById("userAvatar");
 
     // ── Handle login form submit ──────────────────────────
 
@@ -57,6 +58,13 @@ document.addEventListener("DOMContentLoaded", () => {
             loginError.textContent = "";
             loginForm.reset();
 
+            // Show the avatar circle with the first letter of the email
+            if (userAvatar && user.email) {
+                userAvatar.textContent = user.email.charAt(0).toUpperCase();
+                userAvatar.title = user.email;
+                userAvatar.classList.add("show");
+            }
+
             // Start (or resume) Firestore sync exactly once per session.
             // storage.js exposes this function; it wires up the
             // real-time listeners that populate the local caches.
@@ -66,6 +74,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } else {
             loginOverlay.classList.add("show");
+            if (userAvatar) {
+                userAvatar.classList.remove("show");
+                userAvatar.textContent = "";
+                userAvatar.title = "";
+            }
         }
 
     });
