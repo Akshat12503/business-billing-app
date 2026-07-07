@@ -1,4 +1,4 @@
-const CACHE_NAME = "billing-app-v2"; // bumped so old caches are cleared out
+const CACHE_NAME = "billing-app-v3"; // bumped: added share.js + html2canvas
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -9,12 +9,14 @@ const ASSETS_TO_CACHE = [
   "./js/products.js",
   "./js/billing.js",
   "./js/pdf.js",
+  "./js/share.js",
   "./js/app.js",
   "./manifest.json",
   "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css",
   "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js",
   "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
   "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
   "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
   "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js",
   "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"

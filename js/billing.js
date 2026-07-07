@@ -520,6 +520,11 @@ function saveBill() {
 
 
 // ===== WhatsApp Share (current bill) =====
+// Uses shareBillSmart() from share.js: on supported mobile devices this
+// opens the native share sheet with the bill image already attached
+// (like a payment app's "Share Receipt"). On unsupported devices
+// (mainly desktop), it falls back to the original download + WhatsApp
+// Web flow.
 
 function shareCurrentBillOnWhatsapp() {
 
@@ -540,19 +545,7 @@ function shareCurrentBillOnWhatsapp() {
         grandTotal:   parseFloat(document.getElementById("grandTotal").innerText)
     };
 
-    // Step 1: Download the PDF
-    createBillPDF(bill);
-
-    // Step 2: Open WhatsApp after a short delay so the download starts first
-    const name    = customerName || "your order";
-    const message = `Hi, please find the bill for ${name} attached.`;
-
-    setTimeout(() => {
-        window.open(
-            "https://wa.me/?text=" + encodeURIComponent(message),
-            "_blank"
-        );
-    }, 800);
+    shareBillSmart(bill);
 
 }
 
@@ -706,6 +699,7 @@ function deleteBillFromModal() {
 
 
 // ===== WhatsApp Share (from history modal) =====
+// Same smart share behavior as the current-bill version above.
 
 function shareBillOnWhatsapp() {
 
@@ -713,19 +707,7 @@ function shareBillOnWhatsapp() {
 
     const bill = getBills()[selectedHistoryBillIndex];
 
-    // Step 1: Download the PDF
-    createBillPDF(bill);
-
-    // Step 2: Open WhatsApp after a short delay so the download starts first
-    const name    = bill.customerName || "your order";
-    const message = `Hi, please find the bill for ${name} attached.`;
-
-    setTimeout(() => {
-        window.open(
-            "https://wa.me/?text=" + encodeURIComponent(message),
-            "_blank"
-        );
-    }, 800);
+    shareBillSmart(bill);
 
 }
 
