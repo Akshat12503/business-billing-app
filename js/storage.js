@@ -43,8 +43,8 @@ function startStorageSync() {
         if (doc.exists) {
             categoriesCache = doc.data().items || [];
         } else {
-            // First-ever login: seed with sample categories
-            categoriesCache = ["Rice", "Oil", "Spices"];
+            // First-ever login: start with an empty list — add your own categories
+            categoriesCache = [];
             CATEGORY_DOC.set({ items: categoriesCache });
         }
         if (typeof loadCategories === "function") loadCategories();
@@ -52,12 +52,6 @@ function startStorageSync() {
 
     // --- Products ---
     PRODUCTS_COL.onSnapshot((snap) => {
-
-        if (snap.empty && productsCache.length === 0 && !snap.metadata.fromCache) {
-            // First-ever login: seed with sample products
-            seedSampleProducts();
-            return;
-        }
 
         productsCache = snap.docs.map((d) => {
             const data = d.data();
@@ -87,20 +81,6 @@ function startStorageSync() {
     }, (err) => console.error("Counter sync error:", err));
 
 }
-
-function seedSampleProducts() {
-    const sample = [
-        { id: 1, name: "Basmati Rice", category: "Rice", unit: "kg", localRate: 80,  generalRate: 85,  retailRate: 90 },
-        { id: 2, name: "Mustard Oil",  category: "Oil",  unit: "kg", localRate: 140, generalRate: 145, retailRate: 150 }
-    ];
-    const batch = db.batch();
-    sample.forEach((p) => {
-        const { id, ...rest } = p;
-        batch.set(PRODUCTS_COL.doc(String(id)), rest);
-    });
-    batch.commit().catch((err) => console.error("Seeding products failed:", err));
-}
-
 
 // ===== Categories =====
 
