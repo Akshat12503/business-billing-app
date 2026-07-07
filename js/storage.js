@@ -42,11 +42,15 @@ function startStorageSync() {
     CATEGORY_DOC.onSnapshot((doc) => {
         if (doc.exists) {
             categoriesCache = doc.data().items || [];
-        } else {
-            // First-ever login: start with an empty list — add your own categories
+        } else if (!doc.metadata.fromCache) {
+            // Confirmed by the SERVER (not just local cache) that this
+            // document truly doesn't exist yet — safe to initialize.
             categoriesCache = [];
             CATEGORY_DOC.set({ items: categoriesCache });
         }
+        // If it doesn't exist AND this snapshot came from local cache,
+        // do nothing — wait for the server to confirm before deciding
+        // whether to seed, so real data is never overwritten.
         if (typeof loadCategories === "function") loadCategories();
     }, (err) => console.error("Categories sync error:", err));
 
