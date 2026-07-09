@@ -60,7 +60,7 @@ function startStorageSync() {
         productsCache = snap.docs.map((d) => {
             const data = d.data();
             return { id: Number(d.id), ...data };
-        });
+        }).sort((a, b) => a.id - b.id);
 
         if (typeof loadProductTable === "function") loadProductTable();
         if (typeof loadProducts === "function") loadProducts();

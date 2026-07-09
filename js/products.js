@@ -60,12 +60,14 @@ function loadCategoryTable() {
             </td>
             <td style="white-space:nowrap">
                 <button class="btn btn-success btn-sm me-1"
+                    title="Save"
                     onclick="renameCategory(${index})">
-                    Save
+                    ✓
                 </button>
                 <button class="btn btn-danger btn-sm"
+                    title="Delete"
                     onclick="deleteCategory(${index})">
-                    Delete
+                    🗑
                 </button>
             </td>
         `;
@@ -241,13 +243,15 @@ function loadProductTable() {
             </td>
 
             <td style="white-space:nowrap">
-                <button class="btn btn-success btn-sm mb-1"
+                <button class="btn btn-success btn-sm me-1"
+                    title="Save"
                     onclick="saveProductChanges(${product.id})">
-                    Save
+                    ✓
                 </button>
                 <button class="btn btn-danger btn-sm"
+                    title="Delete"
                     onclick="deleteProduct(${product.id})">
-                    Delete
+                    🗑
                 </button>
             </td>
         `;
