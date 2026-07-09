@@ -58,7 +58,7 @@ function loadCategoryTable() {
                     id="cat-${index}"
                     value="${escapeHtml(category)}">
             </td>
-            <td style="white-space:nowrap"; width:1%; padding:4px 8px;>
+            <td style="white-space:nowrap; width:1%; padding:4px 8px;">
                 <button class="btn btn-success btn-sm me-1"
                     title="Save"
                     onclick="renameCategory(${index})">
@@ -104,11 +104,9 @@ function renameCategory(index) {
         return;
     }
 
-    // Rename the category
     categories[index] = newName;
     saveCategories(categories);
 
-    // Also update all products that had the old category name
     const products = getProducts().map(p => {
         if (p.category === oldName) p.category = newName;
         return p;
@@ -134,7 +132,6 @@ function deleteCategory(index) {
 
     if (hasProducts) {
         if (!confirm(`"${name}" has products assigned to it. Deleting it will also delete those products. Continue?`)) return;
-        // Remove all products in this category
         const products = getProducts().filter(p => p.category !== name);
         saveProducts(products);
     } else {
@@ -154,7 +151,7 @@ function deleteCategory(index) {
 
 function loadProducts() {
 
-    const category    = document.getElementById("categorySelect").value;
+    const category      = document.getElementById("categorySelect").value;
     const productSelect = document.getElementById("productSelect");
 
     productSelect.innerHTML = '<option value="">Select Product</option>';
@@ -173,12 +170,15 @@ function loadProducts() {
 }
 
 
-// ===== Render Product Management Table =====
+// ===== Render Product Management Table + Cards =====
 
 function loadProductTable() {
 
-    const tbody = document.getElementById("productTableBody");
+    const tbody         = document.getElementById("productTableBody");
+    const cardContainer = document.getElementById("productCardContainer");
+
     tbody.innerHTML = "";
+    if (cardContainer) cardContainer.innerHTML = "";
 
     const products = getProducts();
 
@@ -189,33 +189,37 @@ function loadProductTable() {
                     No products yet. Add one above.
                 </td>
             </tr>`;
+        if (cardContainer) {
+            cardContainer.innerHTML = `
+                <p class="text-center text-muted py-3">
+                    No products yet. Add one above.
+                </p>`;
+        }
         return;
     }
 
     products.forEach(product => {
 
-        const row = document.createElement("tr");
-
-        // Build category options dynamically so dropdown reflects current categories
         const categoryOptions = getCategories().map(cat =>
             `<option value="${escapeHtml(cat)}" ${cat === product.category ? "selected" : ""}>${escapeHtml(cat)}</option>`
         ).join("");
 
+        // ── Desktop: table row ──────────────────────────────
+
+        const row = document.createElement("tr");
+
         row.innerHTML = `
             <td>${product.id}</td>
-
             <td>
                 <input class="form-control form-control-sm"
                     id="name-${product.id}"
                     value="${escapeHtml(product.name)}">
             </td>
-
             <td>
                 <select class="form-select form-select-sm" id="category-${product.id}">
                     ${categoryOptions}
                 </select>
             </td>
-
             <td>
                 <select class="form-select form-select-sm" id="unit-${product.id}">
                     <option value="kg"     ${product.unit === "kg"     ? "selected" : ""}>kg</option>
@@ -223,25 +227,21 @@ function loadProductTable() {
                     <option value="packet" ${product.unit === "packet" ? "selected" : ""}>packet</option>
                 </select>
             </td>
-
             <td>
                 <input type="number" class="form-control form-control-sm"
                     id="local-${product.id}"
                     value="${product.localRate}">
             </td>
-
             <td>
                 <input type="number" class="form-control form-control-sm"
                     id="general-${product.id}"
                     value="${product.generalRate}">
             </td>
-
             <td>
                 <input type="number" class="form-control form-control-sm"
                     id="retail-${product.id}"
                     value="${product.retailRate}">
             </td>
-
             <td style="white-space:nowrap; width:1%; padding:4px 8px;">
                 <button class="btn btn-success btn-sm me-1"
                     title="Save"
@@ -257,6 +257,72 @@ function loadProductTable() {
         `;
 
         tbody.appendChild(row);
+
+        // ── Mobile: card ────────────────────────────────────
+
+        if (!cardContainer) return;
+
+        const card = document.createElement("div");
+        card.className = "product-card";
+
+        card.innerHTML = `
+            <div class="pc-header">
+                <input class="pc-name-input"
+                    id="card-name-${product.id}"
+                    value="${escapeHtml(product.name)}"
+                    placeholder="Product name">
+                <div class="pc-actions">
+                    <button class="btn btn-success btn-sm"
+                        title="Save"
+                        onclick="saveProductChangesCard(${product.id})">
+                        ✓
+                    </button>
+                    <button class="btn btn-danger btn-sm"
+                        title="Delete"
+                        onclick="deleteProduct(${product.id})">
+                        🗑
+                    </button>
+                </div>
+            </div>
+            <div class="pc-row">
+                <div class="pc-field">
+                    <label>Category</label>
+                    <select class="input" id="card-category-${product.id}">
+                        ${categoryOptions}
+                    </select>
+                </div>
+                <div class="pc-field">
+                    <label>Unit</label>
+                    <select class="input" id="card-unit-${product.id}">
+                        <option value="kg"     ${product.unit === "kg"     ? "selected" : ""}>kg</option>
+                        <option value="piece"  ${product.unit === "piece"  ? "selected" : ""}>piece</option>
+                        <option value="packet" ${product.unit === "packet" ? "selected" : ""}>packet</option>
+                    </select>
+                </div>
+            </div>
+            <div class="pc-row">
+                <div class="pc-field">
+                    <label>Local</label>
+                    <input type="number" class="input"
+                        id="card-local-${product.id}"
+                        value="${product.localRate}">
+                </div>
+                <div class="pc-field">
+                    <label>General</label>
+                    <input type="number" class="input"
+                        id="card-general-${product.id}"
+                        value="${product.generalRate}">
+                </div>
+                <div class="pc-field">
+                    <label>Retail</label>
+                    <input type="number" class="input"
+                        id="card-retail-${product.id}"
+                        value="${product.retailRate}">
+                </div>
+            </div>
+        `;
+
+        cardContainer.appendChild(card);
 
     });
 
@@ -317,7 +383,7 @@ function addProduct(name, category, unit, localRate, generalRate, retailRate) {
 }
 
 
-// ===== Save Product Changes (inline edit) =====
+// ===== Save Product Changes (desktop table) =====
 
 function saveProductChanges(productId) {
 
@@ -349,6 +415,54 @@ function saveProductChanges(productId) {
     alert("Product updated.");
 
 }
+
+
+// ===== Save Product Changes (mobile card) =====
+
+function saveProductChangesCard(productId) {
+
+    const name        = document.getElementById(`card-name-${productId}`).value.trim();
+    const category    = document.getElementById(`card-category-${productId}`).value;
+    const unit        = document.getElementById(`card-unit-${productId}`).value;
+    const localRate   = Number(document.getElementById(`card-local-${productId}`).value);
+    const generalRate = Number(document.getElementById(`card-general-${productId}`).value);
+    const retailRate  = Number(document.getElementById(`card-retail-${productId}`).value);
+
+    if (!name || !category || isNaN(localRate) || isNaN(generalRate) || isNaN(retailRate)) {
+        alert("All fields are required.");
+        return;
+    }
+
+    const allowsNegative = category === "Difference";
+
+    if (!allowsNegative && (localRate < 0 || generalRate < 0 || retailRate < 0)) {
+        alert("Negative rates are only allowed for the 'Difference' category.");
+        return;
+    }
+
+    updateProduct(productId, name, category, unit, localRate, generalRate, retailRate);
+
+    loadProductTable();
+    loadCategories();
+    loadProducts();
+
+    alert("Product updated.");
+
+}
+
+
+// ===== Delete Product =====
+
+function deleteProduct(productId) {
+
+    if (!confirm("Delete this product?")) return;
+
+    const products = getProducts().filter(p => p.id != productId);
+    saveProducts(products);
+    loadProductTable();
+
+}
+
 
 // ===== Utility =====
 
