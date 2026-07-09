@@ -58,7 +58,7 @@ function loadCategoryTable() {
                     id="cat-${index}"
                     value="${escapeHtml(category)}">
             </td>
-            <td style="white-space:nowrap">
+            <td style="white-space:nowrap"; width:1%; padding:4px 8px;>
                 <button class="btn btn-success btn-sm me-1"
                     title="Save"
                     onclick="renameCategory(${index})">
@@ -242,7 +242,7 @@ function loadProductTable() {
                     value="${product.retailRate}">
             </td>
 
-            <td style="white-space:nowrap">
+            <td style="white-space:nowrap; width:1%; padding:4px 8px;">
                 <button class="btn btn-success btn-sm me-1"
                     title="Save"
                     onclick="saveProductChanges(${product.id})">
