@@ -204,9 +204,13 @@ function loadProductTable() {
             `<option value="${escapeHtml(cat)}" ${cat === product.category ? "selected" : ""}>${escapeHtml(cat)}</option>`
         ).join("");
 
+        // Text used for search matching (name + category), lowercased
+        const searchText = `${product.name} ${product.category}`.toLowerCase();
+
         // ── Desktop: table row ──────────────────────────────
 
         const row = document.createElement("tr");
+        row.dataset.searchText = searchText;
 
         row.innerHTML = `
             <td>${product.id}</td>
@@ -264,6 +268,7 @@ function loadProductTable() {
 
         const card = document.createElement("div");
         card.className = "product-card";
+        card.dataset.searchText = searchText;
 
         card.innerHTML = `
             <div class="pc-header">
@@ -326,7 +331,41 @@ function loadProductTable() {
 
     });
 
+    // Re-apply whatever search term is currently typed (e.g. after adding
+    // a new product while a filter is active, or on first render).
+    filterProductManageList();
+
 }
+
+
+// ===== Search / Filter the Product Management list =====
+// Filters both the desktop table rows and mobile cards live as you type,
+// matching against product name or category.
+
+function filterProductManageList() {
+
+    const input = document.getElementById("productManageSearch");
+    if (!input) return;
+
+    const query = input.value.trim().toLowerCase();
+
+    document.querySelectorAll("#productTableBody tr[data-search-text]").forEach(row => {
+        row.style.display = row.dataset.searchText.includes(query) ? "" : "none";
+    });
+
+    document.querySelectorAll(".product-card[data-search-text]").forEach(card => {
+        card.style.display = card.dataset.searchText.includes(query) ? "" : "none";
+    });
+
+}
+
+// Wire up the search input once, when the DOM is ready.
+document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.getElementById("productManageSearch");
+    if (searchInput) {
+        searchInput.addEventListener("input", filterProductManageList);
+    }
+});
 
 
 // ===== Get Single Product by ID =====

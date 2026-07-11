@@ -1,0 +1,20 @@
+{
+  "name": "business-billing-app",
+  "version": "1.0.0",
+  "description": "A simple, fast billing application built for small shops. Add products and categories, generate bills, share them on WhatsApp, print thermal/A4 receipts, and keep everything backed up and synced across devices in real time.",
+  "main": "service-worker.js",
+  "scripts": {
+    "deploy": "node build.js && firebase deploy --only hosting"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Akshat12503/business-billing-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Akshat12503/business-billing-app/issues"
+  },
+  "homepage": "https://github.com/Akshat12503/business-billing-app#readme"
+}

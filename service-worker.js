@@ -1,4 +1,4 @@
-const CACHE_NAME = "billing-app-v3"; // bumped: added share.js + html2canvas
+const CACHE_NAME = 'billbook-v1783685796494';
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
