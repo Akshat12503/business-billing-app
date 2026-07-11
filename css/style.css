@@ -856,3 +856,18 @@ td { vertical-align: middle; font-size: 13.5px; }
     border-top: 1.5px solid #000;
     padding-top: 6px;
 }
+/* ===== Modal header fix — force title visible, prevent clipping ===== */
+.modal-header {
+    background-color: var(--text-1) !important;
+    color: #ffffff !important;
+    padding: 16px 20px !important;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+}
+
+.modal-header .modal-title {
+    color: #ffffff !important;
+    margin: 0;
+    font-size: 16px;
+}
