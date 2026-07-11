@@ -8,7 +8,11 @@ function loadCategories() {
     categorySelect.innerHTML     = '<option value="">Select Category</option>';
     newProductCategory.innerHTML = "";
 
-    getCategories().forEach(category => {
+    const sortedCategories = [...getCategories()].sort((a, b) =>
+        a.localeCompare(b, undefined, { sensitivity: "base" })
+    );
+
+    sortedCategories.forEach(category => {
 
         const opt1       = document.createElement("option");
         opt1.value       = category;
@@ -48,7 +52,14 @@ function loadCategoryTable() {
         return;
     }
 
-    categories.forEach((category, index) => {
+    // Sort alphabetically for display, but keep track of each category's
+    // real index in the underlying array so rename/delete still target
+    // the correct entry.
+    const sortedWithIndex = categories
+        .map((category, index) => ({ category, index }))
+        .sort((a, b) => a.category.localeCompare(b.category, undefined, { sensitivity: "base" }));
+
+    sortedWithIndex.forEach(({ category, index }) => {
 
         const row = document.createElement("tr");
 
@@ -198,7 +209,18 @@ function loadProductTable() {
         return;
     }
 
-    products.forEach(product => {
+    // Group products by category (in the order categories were created),
+    // then alphabetically by name within each category — so all products
+    // in the same category always sit together.
+    const categoryOrder = getCategories();
+    const sortedProducts = [...products].sort((a, b) => {
+        const catA = categoryOrder.indexOf(a.category);
+        const catB = categoryOrder.indexOf(b.category);
+        if (catA !== catB) return catA - catB;
+        return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+    });
+
+    sortedProducts.forEach((product, displayIndex) => {
 
         const categoryOptions = getCategories().map(cat =>
             `<option value="${escapeHtml(cat)}" ${cat === product.category ? "selected" : ""}>${escapeHtml(cat)}</option>`
@@ -213,7 +235,7 @@ function loadProductTable() {
         row.dataset.searchText = searchText;
 
         row.innerHTML = `
-            <td>${product.id}</td>
+            <td>${displayIndex + 1}</td>
             <td>
                 <input class="form-control form-control-sm"
                     id="name-${product.id}"
@@ -229,6 +251,8 @@ function loadProductTable() {
                     <option value="kg"     ${product.unit === "kg"     ? "selected" : ""}>kg</option>
                     <option value="piece"  ${product.unit === "piece"  ? "selected" : ""}>piece</option>
                     <option value="packet" ${product.unit === "packet" ? "selected" : ""}>packet</option>
+                    <option value="pair"   ${product.unit === "pair"   ? "selected" : ""}>pair</option>
+                    <option value="dozen"  ${product.unit === "dozen"  ? "selected" : ""}>dozen</option>
                 </select>
             </td>
             <td>
@@ -302,6 +326,8 @@ function loadProductTable() {
                         <option value="kg"     ${product.unit === "kg"     ? "selected" : ""}>kg</option>
                         <option value="piece"  ${product.unit === "piece"  ? "selected" : ""}>piece</option>
                         <option value="packet" ${product.unit === "packet" ? "selected" : ""}>packet</option>
+                        <option value="pair"   ${product.unit === "pair"   ? "selected" : ""}>pair</option>
+                        <option value="dozen"  ${product.unit === "dozen"  ? "selected" : ""}>dozen</option>
                     </select>
                 </div>
             </div>
