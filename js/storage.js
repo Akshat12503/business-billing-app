@@ -60,7 +60,7 @@ function startStorageSync() {
         productsCache = snap.docs.map((d) => {
             const data = d.data();
             return { id: Number(d.id), ...data };
-        }).sort((a, b) => a.id - b.id);
+        });
 
         if (typeof loadProductTable === "function") loadProductTable();
         if (typeof loadProducts === "function") loadProducts();
@@ -202,7 +202,7 @@ function withCreatedAt(bill, existingDoc) {
 
 
 // ===== Bill Number =====
-// Format: A1 -> A100, then B1 -> B100, then C1 -> C100, etc.
+// Format: CA1 -> CA100, then CB1 -> CB100, then CC1 -> CC100, etc.
 // Uses a Firestore transaction so two devices saving at the same moment
 // never get the same bill number.
 
@@ -225,7 +225,7 @@ function generateBillNumber() {
     const number       = ((counter - 1) % 100) + 1;
     const letter       = String.fromCharCode(65 + letterIndex); // A, B, C...
 
-    return `${letter}${number}`;
+    return `C${letter}${number}`;
 }
 
 

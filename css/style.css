@@ -856,10 +856,11 @@ td { vertical-align: middle; font-size: 13.5px; }
     border-top: 1.5px solid #000;
     padding-top: 6px;
 }
-/* ===== Modal header fix — force title visible, prevent clipping ===== */
+/* ===== Modal header — plain white style, no dark bar ===== */
 .modal-header {
-    background-color: var(--text-1) !important;
-    color: #ffffff !important;
+    background-color: var(--surface) !important;
+    color: var(--text-1) !important;
+    border-bottom: 1px solid var(--border);
     padding: 16px 20px !important;
     min-height: 56px;
     display: flex;
@@ -867,7 +868,12 @@ td { vertical-align: middle; font-size: 13.5px; }
 }
 
 .modal-header .modal-title {
-    color: #ffffff !important;
+    color: var(--text-1) !important;
     margin: 0;
     font-size: 16px;
+    font-weight: 700;
+}
+
+.modal-header .btn-close {
+    filter: none !important; /* was inverted for the dark background, not needed now */
 }
