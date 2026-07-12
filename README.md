@@ -1,4 +1,4 @@
-# BillBook
+# BillBook/EzeeBill
 
 A simple, fast billing application built for small shops. Add products and categories, generate bills, share them on WhatsApp, print thermal/A4 receipts, and keep everything backed up and synced across devices in real time.
 
